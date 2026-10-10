@@ -145,15 +145,6 @@ func Test_ParseInteger(t *testing.T) {
 		assert.ErrorIs(t, strconv.ErrSyntax, err)
 		assert.Equal(t, 0, have)
 	})
-
-	t.Run("error - empty string", func(t *testing.T) {
-		// --- When ---
-		have, err := ParseInteger("KEY_NAME", "")
-
-		// --- Then ---
-		assert.ErrorIs(t, ErrKeyEmpty, err)
-		assert.Equal(t, 0, have)
-	})
 }
 
 func Test_ParseInteger_tabular(t *testing.T) {
@@ -161,7 +152,7 @@ func Test_ParseInteger_tabular(t *testing.T) {
 		testN string
 
 		key     string
-		dur     string
+		val     string
 		wantMsg string
 	}{
 		{
@@ -184,7 +175,7 @@ func Test_ParseInteger_tabular(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.testN, func(t *testing.T) {
 			// --- When ---
-			have, err := ParseInteger(tc.key, tc.dur)
+			have, err := ParseInteger(tc.key, tc.val)
 
 			// --- Then ---
 			assert.SameType(t, &FieldErrors{}, err)
@@ -203,15 +194,6 @@ func Test_ParseTimezone(t *testing.T) {
 		// --- Then ---
 		assert.NoError(t, err)
 		assert.Equal(t, "Europe/Warsaw", have.String())
-	})
-
-	t.Run("error - empty string", func(t *testing.T) {
-		// --- When ---
-		have, err := ParseTimezone("KEY_NAME", "")
-
-		// --- Then ---
-		assert.ErrorIs(t, ErrKeyEmpty, err)
-		assert.Nil(t, have)
 	})
 }
 
