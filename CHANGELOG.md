@@ -1,0 +1,49 @@
+## v0.1.0 (Sat, 10 Oct 2026 19:22:48 UTC)
+- chore: scaffold project.
+- chore: add MIT license.
+- feat(xcfg): add dotenv-based configuration package.
+- docs: add README and agent guide.
+- fix(xcfg): apply each nested adapter once.
+- fix(xcfg): change only keys carrying the "from" prefix and separator.
+- fix(xcfg): let prefixed keys win key collisions deterministically.
+- fix(xcfg): keep integer-looking values verbatim in Marshal.
+- fix(xcfg): keep the open error in NewFromPath failures.
+- fix(xcfg): keep parse causes and accept full-range ints in parsers.
+- fix(xcfg): treat a path through a file as a missing directory.
+- fix(xcfg): make Adaptor and Config.SetFrom zero values safe.
+- feat(xcfg)!: export the NewFromPath option type.
+- refactor(xcfg)!: return *bytes.Reader from Open helpers.
+- fix(xcfgtest)!: restore the environment Fake.SetEnv changes.
+- fix(xcfgtest): load the config even after an earlier test failure.
+- refactor(xcfgtest)!: return Config from NewFromPath and NewFromReader.
+- docs: document xcfgtest and correct xcfg godoc.
+- refactor(xcfg): move key and check functions out of helpers.go.
+- docs: update AGENTS.md for the new file layout.
+- refactor(xcfgtest): stop re-converting stored strings in Fake.
+- test(xcfg): restructure tests to the project test conventions.
+- test(xcfgtest): restructure tests to the project test conventions.
+- test(xcfgtest): drop dots from anyToStr subtest names.
+- fix(xcfgtest): load NewFromPath through xcfg.NewFromPath.
+- refactor(xcfgtest): build FakeLoad on NewFromPath.
+- fix(xcfgtest): leave the key unset for an unsupported value.
+- fix(xcfgtest): prefix keys in SetFromWithPrefix with xcfg.Prefix.
+- docs(xcfg): state which keys Config.Marshal round-trips.
+- style(xcfg): build quoted Marshal lines without Sprintf.
+- docs(xcfg): drop error code comments that restate the names.
+- docs(xcfg): fix grammar in key and adapter godoc.
+- test: read back values with must.Value where the error is not tested.
+- test(xcfgtest): build SetFrom input maps in the Given block.
+- style: group test setup and assertions by subject.
+- test(xcfgtest): order Test_anyToStr before its tabular test.
+- test(xcfgtest): move the Fake.Set table into Test_Fake_Set_tabular.
+- test(xcfg): assert merged values and source precedence in Merge.
+- test(xcfg): round-trip every escaped character through Unmarshal.
+- test(xcfg): name Config locals cfg and Adaptor locals adr.
+- test(xcfg): shorten adapter subtest names.
+- test(xcfg): assert wrapped causes with assert.ErrorIs.
+- test(xcfg): drop duplicate empty-value parser subtests.
+- docs(readme): list features as bullets and narrow the error claim.
+- style(xcfg): resolve errcheck and gosec lint findings.
+- build(deps): bump dotenv to v0.6.0 and testing to v0.57.0.
+- build(deps): update 4 ctx42 dependencies.
+
