@@ -200,7 +200,7 @@ func Test_MapAdapter_tabular(t *testing.T) {
 			"3",
 		},
 		{
-			"value of key not being translated",
+			"untranslated key",
 			map[string]string{"A": "1", "B": "2", "C": "3"},
 			map[string]string{"B": "C"},
 			"C",
@@ -242,7 +242,7 @@ func Test_ChangeAdapter_tabular(t *testing.T) {
 			"1",
 		},
 		{
-			"key is prefixed only if from prefix is present",
+			"from prefix absent",
 			map[string]string{"XX_A": "1", "A": "2"},
 			"YY",
 			"XX",
