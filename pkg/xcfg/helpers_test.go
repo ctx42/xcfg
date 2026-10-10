@@ -63,18 +63,15 @@ func Test_Merge(t *testing.T) {
 		have := Merge(dst, src0, src1)
 
 		// --- Then ---
-		assert.Len(t, 5, dst)
-		assert.HasKey(t, "KEY1", dst)
-		assert.HasKey(t, "KEY2", dst)
-		assert.HasKey(t, "KEY3", dst)
-		assert.HasKey(t, "KEY4", dst)
-		assert.HasKey(t, "KEY5", dst)
-		assert.Len(t, 5, have)
-		assert.HasKey(t, "KEY1", have)
-		assert.HasKey(t, "KEY2", have)
-		assert.HasKey(t, "KEY3", have)
-		assert.HasKey(t, "KEY4", have)
-		assert.HasKey(t, "KEY5", have)
+		want := map[string]string{
+			"KEY1": "VAL1",
+			"KEY2": "VAL2",
+			"KEY3": "VAL3",
+			"KEY4": "VAL4",
+			"KEY5": "VAL5",
+		}
+		assert.Equal(t, want, have)
+		assert.Same(t, dst, have)
 	})
 
 	t.Run("dst argument is nil", func(t *testing.T) {
@@ -92,11 +89,13 @@ func Test_Merge(t *testing.T) {
 		have := Merge(nil, src0, src1)
 
 		// --- Then ---
-		assert.Len(t, 4, have)
-		assert.HasKey(t, "KEY1", have)
-		assert.HasKey(t, "KEY2", have)
-		assert.HasKey(t, "KEY4", have)
-		assert.HasKey(t, "KEY5", have)
+		want := map[string]string{
+			"KEY1": "VAL1",
+			"KEY2": "VAL2",
+			"KEY4": "VAL4",
+			"KEY5": "VAL5",
+		}
+		assert.Equal(t, want, have)
 	})
 
 	t.Run("src is nil", func(t *testing.T) {
@@ -108,10 +107,8 @@ func Test_Merge(t *testing.T) {
 		have := Merge(dst, nil)
 
 		// --- Then ---
-		assert.Len(t, 1, dst)
-		assert.HasKey(t, "KEY3", dst)
-		assert.Len(t, 1, have)
-		assert.HasKey(t, "KEY3", have)
+		assert.Equal(t, map[string]string{"KEY3": "VAL3"}, have)
+		assert.Same(t, dst, have)
 	})
 
 	t.Run("one of the sources is nil", func(t *testing.T) {
@@ -128,14 +125,26 @@ func Test_Merge(t *testing.T) {
 		have := Merge(dst, src0, nil)
 
 		// --- Then ---
-		assert.Len(t, 3, dst)
-		assert.HasKey(t, "KEY1", dst)
-		assert.HasKey(t, "KEY2", dst)
-		assert.HasKey(t, "KEY3", dst)
-		assert.Len(t, 3, have)
-		assert.HasKey(t, "KEY1", have)
-		assert.HasKey(t, "KEY2", have)
-		assert.HasKey(t, "KEY3", have)
+		want := map[string]string{
+			"KEY1": "VAL1",
+			"KEY2": "VAL2",
+			"KEY3": "VAL3",
+		}
+		assert.Equal(t, want, have)
+		assert.Same(t, dst, have)
+	})
+
+	t.Run("later source wins", func(t *testing.T) {
+		// --- Given ---
+		dst := map[string]string{"KEY": "DST"}
+		src0 := map[string]string{"KEY": "SRC0"}
+		src1 := map[string]string{"KEY": "SRC1"}
+
+		// --- When ---
+		have := Merge(dst, src0, src1)
+
+		// --- Then ---
+		assert.Equal(t, map[string]string{"KEY": "SRC1"}, have)
 	})
 }
 
