@@ -4,6 +4,7 @@
 package xcfgtest
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/ctx42/testing/pkg/tester"
@@ -12,7 +13,7 @@ import (
 )
 
 // Open returns reader for configuration file. Calls t.Error() on error.
-func Open(t tester.T, pth string) io.Reader {
+func Open(t tester.T, pth string) *bytes.Reader {
 	t.Helper()
 	r, err := xcfg.Open(pth)
 	if err != nil {

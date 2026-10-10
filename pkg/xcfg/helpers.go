@@ -23,7 +23,7 @@ import (
 //   Now we have one convention in this file and other in adapters.
 
 // Open helper function for reading a file to buffer and returning a reader.
-func Open(pth string) (io.Reader, error) {
+func Open(pth string) (*bytes.Reader, error) {
 	buf, err := os.ReadFile(pth)
 	if err != nil {
 		return nil, err
