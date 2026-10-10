@@ -26,10 +26,10 @@ func Test_GetOr_tabular(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.testN, func(t *testing.T) {
 			// --- Given ---
-			cpv := NewFromEnv(tc.env)
+			cfg := NewFromEnv(tc.env)
 
 			// --- When ---
-			have := GetOr(tc.key, cpv, tc.def)
+			have := GetOr(tc.key, cfg, tc.def)
 
 			// --- Then ---
 			assert.Equal(t, tc.want, have)

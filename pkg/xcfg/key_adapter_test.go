@@ -13,8 +13,8 @@ import (
 func Test_Adaptor_CfgKey(t *testing.T) {
 	t.Run("chained", func(t *testing.T) {
 		// --- Given ---
-		cpv := Config{"A": "1", "XX_B": "2"}
-		adr := AddAdapter(ChangeAdapter(cpv, "YY", "XX"), "YY")
+		cfg := Config{"A": "1", "XX_B": "2"}
+		adr := AddAdapter(ChangeAdapter(cfg, "YY", "XX"), "YY")
 
 		// --- When ---
 		have, err := adr.CfgKey("B")
@@ -26,8 +26,8 @@ func Test_Adaptor_CfgKey(t *testing.T) {
 
 	t.Run("error - chained missing key", func(t *testing.T) {
 		// --- Given ---
-		cpv := Config{"A": "1", "XX_B": "2"}
-		adr := AddAdapter(ChangeAdapter(cpv, "YY", "XX"), "YY")
+		cfg := Config{"A": "1", "XX_B": "2"}
+		adr := AddAdapter(ChangeAdapter(cfg, "YY", "XX"), "YY")
 
 		// --- When ---
 		have, err := adr.CfgKey("C")
@@ -52,8 +52,8 @@ func Test_Adaptor_CfgKey(t *testing.T) {
 
 	t.Run("nested adapters applied once", func(t *testing.T) {
 		// --- Given ---
-		cpv := Config{"A_B_K": "1"}
-		adr := AddAdapter(AddAdapter(cpv, "A"), "B")
+		cfg := Config{"A_B_K": "1"}
+		adr := AddAdapter(AddAdapter(cfg, "A"), "B")
 
 		// --- When ---
 		have, err := adr.CfgKey("K")
@@ -146,10 +146,10 @@ func Test_MapAdapter(t *testing.T) {
 	t.Run("nil map", func(t *testing.T) {
 		// --- Given ---
 		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
-		cpv := MapAdapter(Config(cfg), nil)
+		adr := MapAdapter(Config(cfg), nil)
 
 		// --- When ---
-		have, err := cpv.CfgKey("A")
+		have, err := adr.CfgKey("A")
 
 		// --- Then ---
 		assert.NoError(t, err)
@@ -159,10 +159,10 @@ func Test_MapAdapter(t *testing.T) {
 	t.Run("error - missing key", func(t *testing.T) {
 		// --- Given ---
 		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
-		cpv := MapAdapter(Config(cfg), nil)
+		adr := MapAdapter(Config(cfg), nil)
 
 		// --- When ---
-		have, err := cpv.CfgKey("D")
+		have, err := adr.CfgKey("D")
 
 		// --- Then ---
 		xrrtest.AssertFieldIs(t, "D", ErrKeyMissing, err)
@@ -172,10 +172,10 @@ func Test_MapAdapter(t *testing.T) {
 	t.Run("error - missing translated key", func(t *testing.T) {
 		// --- Given ---
 		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
-		cpv := MapAdapter(Config(cfg), map[string]string{"A": "D"})
+		adr := MapAdapter(Config(cfg), map[string]string{"A": "D"})
 
 		// --- When ---
-		have, err := cpv.CfgKey("A")
+		have, err := adr.CfgKey("A")
 
 		// --- Then ---
 		xrrtest.AssertFieldIs(t, "D", ErrKeyMissing, err)
@@ -211,10 +211,10 @@ func Test_MapAdapter_tabular(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.testN, func(t *testing.T) {
 			// --- Given ---
-			cpv := MapAdapter(Config(tc.cfg), tc.tr)
+			adr := MapAdapter(Config(tc.cfg), tc.tr)
 
 			// --- When ---
-			have, err := cpv.CfgKey(tc.key)
+			have, err := adr.CfgKey(tc.key)
 
 			// --- Then ---
 			assert.NoError(t, err)
@@ -254,10 +254,10 @@ func Test_ChangeAdapter_tabular(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.testN, func(t *testing.T) {
 			// --- Given ---
-			cpv := ChangeAdapter(Config(tc.cfg), tc.from, tc.to)
+			adr := ChangeAdapter(Config(tc.cfg), tc.from, tc.to)
 
 			// --- When ---
-			have, err := cpv.CfgKey(tc.key)
+			have, err := adr.CfgKey(tc.key)
 
 			// --- Then ---
 			assert.NoError(t, err)

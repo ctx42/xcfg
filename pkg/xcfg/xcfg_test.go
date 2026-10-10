@@ -309,10 +309,10 @@ func Test_NewFromEnv(t *testing.T) {
 func Test_Config_CfgKey(t *testing.T) {
 	t.Run("get existing", func(t *testing.T) {
 		// --- Given ---
-		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
+		cfg := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 
 		// --- When ---
-		have, err := cpv.CfgKey("LOG_DIR")
+		have, err := cfg.CfgKey("LOG_DIR")
 
 		// --- Then ---
 		assert.NoError(t, err)
@@ -321,10 +321,10 @@ func Test_Config_CfgKey(t *testing.T) {
 
 	t.Run("get existing zero value", func(t *testing.T) {
 		// --- Given ---
-		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
+		cfg := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 
 		// --- When ---
-		have, err := cpv.CfgKey("VALUE")
+		have, err := cfg.CfgKey("VALUE")
 
 		// --- Then ---
 		assert.NoError(t, err)
@@ -333,10 +333,10 @@ func Test_Config_CfgKey(t *testing.T) {
 
 	t.Run("error - missing key", func(t *testing.T) {
 		// --- Given ---
-		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
+		cfg := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 
 		// --- When ---
-		have, err := cpv.CfgKey("NOT_EXISTING")
+		have, err := cfg.CfgKey("NOT_EXISTING")
 
 		// --- Then ---
 		xrrtest.AssertFieldIs(t, "NOT_EXISTING", ErrKeyMissing, err)
@@ -346,11 +346,11 @@ func Test_Config_CfgKey(t *testing.T) {
 
 	t.Run("env does not override file", func(t *testing.T) {
 		// --- Given ---
-		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
+		cfg := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 		t.Setenv("VALUE", "2")
 
 		// --- When ---
-		have, err := cpv.CfgKey("VALUE")
+		have, err := cfg.CfgKey("VALUE")
 
 		// --- Then ---
 		assert.NoError(t, err)
@@ -359,11 +359,11 @@ func Test_Config_CfgKey(t *testing.T) {
 
 	t.Run("error - key only in env", func(t *testing.T) {
 		// --- Given ---
-		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
+		cfg := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 		t.Setenv("VALUE_ENV", "123")
 
 		// --- When ---
-		have, err := cpv.CfgKey("VALUE_ENV")
+		have, err := cfg.CfgKey("VALUE_ENV")
 
 		// --- Then ---
 		xrrtest.AssertFieldIs(t, "VALUE_ENV", ErrKeyMissing, err)
