@@ -154,6 +154,17 @@ func Test_StripPrefixes(t *testing.T) {
 		assert.NotSame(t, data, have)
 	})
 
+	t.Run("prefixed key wins on collision", func(t *testing.T) {
+		// --- Given ---
+		data := map[string]string{"MY_KEY": "VAL_1", "KEY": "VAL_2"}
+
+		// --- When ---
+		have := StripPrefixes("MY", data)
+
+		// --- Then ---
+		assert.Equal(t, map[string]string{"KEY": "VAL_1"}, have)
+	})
+
 	t.Run("nil map", func(t *testing.T) {
 		// --- When ---
 		have := StripPrefixes("", nil)
@@ -289,6 +300,17 @@ func Test_ChangePrefix(t *testing.T) {
 		}
 		assert.Equal(t, want, have)
 		assert.NotSame(t, data, have)
+	})
+
+	t.Run("prefixed key wins on collision", func(t *testing.T) {
+		// --- Given ---
+		data := map[string]string{"MY_KEY": "VAL_1", "YOUR_KEY": "VAL_2"}
+
+		// --- When ---
+		have := ChangePrefix("MY", "YOUR", data)
+
+		// --- Then ---
+		assert.Equal(t, map[string]string{"YOUR_KEY": "VAL_1"}, have)
 	})
 
 	t.Run("nil map", func(t *testing.T) {

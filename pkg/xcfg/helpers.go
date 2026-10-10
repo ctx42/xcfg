@@ -58,15 +58,23 @@ func StripPrefix(prefix, key string) string {
 	return key
 }
 
-// StripPrefixes strips prefix from all the map keys. It does not edit the
-// original map. It always returns a new map without editing the original one.
+// StripPrefixes strips prefix from all the map keys. When a stripped key
+// collides with a key that never had the prefix, the value of the prefixed key
+// wins. It always returns a new map without editing the original one.
 func StripPrefixes(prefix string, cfg map[string]string) map[string]string {
 	if prefix == "" || len(cfg) == 0 {
 		return maps.Clone(cfg)
 	}
 	ret := make(map[string]string, len(cfg))
 	for key, val := range cfg {
-		ret[StripPrefix(prefix, key)] = val
+		if StripPrefix(prefix, key) == key {
+			ret[key] = val
+		}
+	}
+	for key, val := range cfg {
+		if stripped := StripPrefix(prefix, key); stripped != key {
+			ret[stripped] = val
+		}
 	}
 	return ret
 }
@@ -85,17 +93,22 @@ func AddPrefixes(prefix string, cfg map[string]string) map[string]string {
 }
 
 // ChangePrefix changes all key names which have prefix "from" to prefix "to".
-// It always returns a new map without editing the original one.
+// When a changed key collides with an existing key, the value of the key that
+// had the "from" prefix wins. It always returns a new map without editing the
+// original one.
 func ChangePrefix(from, to string, cfg map[string]string) map[string]string {
 	if from == "" || len(cfg) == 0 {
 		return maps.Clone(cfg)
 	}
 	ret := make(map[string]string, len(cfg))
 	for key, val := range cfg {
+		if StripPrefix(from, key) == key {
+			ret[key] = val
+		}
+	}
+	for key, val := range cfg {
 		if stripped := StripPrefix(from, key); stripped != key {
 			ret[Prefix(to, stripped)] = val
-		} else {
-			ret[key] = val
 		}
 	}
 	return ret
