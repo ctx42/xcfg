@@ -398,6 +398,8 @@ func Test_Fake_SetEnv(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
+		tspy.ExpectSetenv("SUB_TEST_LOG_DIR", "/var/log")
+		tspy.ExpectSetenv("SUB_TEST_VALUE", "value")
 		tspy.Close()
 
 		cpf := NewFake(tspy)
@@ -417,18 +419,15 @@ func Test_Fake_SetEnv(t *testing.T) {
 		assert.Equal(t, "value", val)
 	})
 
-	t.Run("invalid argument", func(t *testing.T) {
-		// --- Given ---
-		tspy := tester.New(t)
-		tspy.ExpectError()
-		tspy.ExpectLogEqual("setenv: invalid argument")
-		tspy.Close()
-
-		cpf := NewFake(tspy)
-		cpf.Set("", "value")
-
+	t.Run("restored after test", func(t *testing.T) {
 		// --- When ---
-		cpf.SetEnv()
+		t.Run("set", func(t *testing.T) {
+			NewFake(t).Set("SUB_TEST_RESTORED", "value").SetEnv()
+		})
+
+		// --- Then ---
+		_, ok := os.LookupEnv("SUB_TEST_RESTORED")
+		assert.False(t, ok)
 	})
 }
 

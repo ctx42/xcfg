@@ -188,16 +188,16 @@ func (cpf *Fake) Encode() string {
 	return xcfg.Config(cpf.cfg).Encode()
 }
 
-// SetEnv sets environment variables based on cfg map.
+// SetEnv sets an environment variable for every configuration key using the
+// test's Setenv, which restores the previous values when the test ends and
+// fails the test on an invalid key.
 func (cpf *Fake) SetEnv() {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
 	cpf.t.Helper()
 
 	for k, v := range cpf.cfg {
-		if err := os.Setenv(k, v); err != nil {
-			cpf.t.Error(err.Error())
-		}
+		cpf.t.Setenv(k, v)
 	}
 }
 
