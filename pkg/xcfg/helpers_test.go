@@ -23,7 +23,7 @@ func Test_Open(t *testing.T) {
 		assert.NotNil(t, have)
 	})
 
-	t.Run("not existing", func(t *testing.T) {
+	t.Run("error - not existing", func(t *testing.T) {
 		// --- When ---
 		have, err := Open("/some/not/existing/path/app.conf")
 
@@ -33,7 +33,7 @@ func Test_Open(t *testing.T) {
 		assert.Nil(t, have)
 	})
 
-	t.Run("directory", func(t *testing.T) {
+	t.Run("error - directory", func(t *testing.T) {
 		// --- When ---
 		have, err := Open("testdata")
 
@@ -70,7 +70,6 @@ func Test_Merge(t *testing.T) {
 		assert.HasKey(t, "KEY3", dst)
 		assert.HasKey(t, "KEY4", dst)
 		assert.HasKey(t, "KEY5", dst)
-
 		assert.Len(t, 5, have)
 		assert.HasKey(t, "KEY1", have)
 		assert.HasKey(t, "KEY2", have)
@@ -113,7 +112,6 @@ func Test_Merge(t *testing.T) {
 		// --- Then ---
 		assert.Len(t, 1, dst)
 		assert.HasKey(t, "KEY3", dst)
-
 		assert.Len(t, 1, have)
 		assert.HasKey(t, "KEY3", have)
 	})
@@ -136,7 +134,6 @@ func Test_Merge(t *testing.T) {
 		assert.HasKey(t, "KEY1", dst)
 		assert.HasKey(t, "KEY2", dst)
 		assert.HasKey(t, "KEY3", dst)
-
 		assert.Len(t, 3, have)
 		assert.HasKey(t, "KEY1", have)
 		assert.HasKey(t, "KEY2", have)
@@ -151,11 +148,11 @@ func Test_DirExists_tabular(t *testing.T) {
 		path string
 		want bool
 	}{
-		{"1", "testdata/equals.conf", false}, // A file is not a directory.
-		{"2", "testdata/not_existing.conf", false},
-		{"3", "testdata", true},
-		{"4", "testdata/link.conf", false},
-		{"5", "testdata/equals.conf/sub", false}, // Under a file.
+		{"file", "testdata/equals.conf", false},
+		{"not existing", "testdata/not_existing.conf", false},
+		{"directory", "testdata", true},
+		{"link to file", "testdata/link.conf", false},
+		{"under a file", "testdata/equals.conf/sub", false},
 	}
 
 	for _, tc := range tt {
@@ -178,13 +175,13 @@ func Test_doubleQuoteEscape_tabular(t *testing.T) {
 		want string
 	}{
 		{"empty", "", ""},
-		{"1", "\\", "\\\\"},
-		{"2", "\n", "\\n"},
-		{"3", "\r", "\\r"},
-		{"4", "!", "\\!"},
-		{"5", "$", "\\$"},
-		{"6", `"`, "\\\""},
-		{"7", "abc\ndef", "abc\\ndef"},
+		{"backslash", "\\", "\\\\"},
+		{"new line", "\n", "\\n"},
+		{"carriage return", "\r", "\\r"},
+		{"exclamation", "!", "\\!"},
+		{"dollar", "$", "\\$"},
+		{"double quote", `"`, "\\\""},
+		{"text with new line", "abc\ndef", "abc\\ndef"},
 	}
 
 	for _, tc := range tt {
@@ -238,16 +235,14 @@ func Test_maybeDecode(t *testing.T) {
 
 	t.Run("simple encoded config", func(t *testing.T) {
 		// --- Given ---
-		src := "A=B\nC=D\n"
-		enc := "base64:QT1CCkM9RAo"
-		r := strings.NewReader(enc)
+		r := strings.NewReader("base64:QT1CCkM9RAo")
 
 		// --- When ---
 		have, err := maybeDecode(r)
 
 		// --- Then ---
 		assert.NoError(t, err)
-		assert.Equal(t, src, iokit.ReadAllStr(t, have))
+		assert.Equal(t, "A=B\nC=D\n", iokit.ReadAllStr(t, have))
 	})
 
 	t.Run("encoded config", func(t *testing.T) {
@@ -264,7 +259,7 @@ func Test_maybeDecode(t *testing.T) {
 		assert.Equal(t, oskit.ReadFileStr(t, pth), iokit.ReadAllStr(t, have))
 	})
 
-	t.Run("decode error", func(t *testing.T) {
+	t.Run("error - invalid base64", func(t *testing.T) {
 		// --- Given ---
 		r := strings.NewReader("base64:%%%")
 
@@ -284,11 +279,11 @@ func Test_EnvSplit_tabular(t *testing.T) {
 		env  []string
 		want map[string]string
 	}{
-		{"1", []string{}, map[string]string{}},
-		{"1a", []string{""}, map[string]string{}},
-		{"2", []string{"A=B"}, map[string]string{"A": "B"}},
-		{"3", []string{"A=B=C"}, map[string]string{"A": "B=C"}},
-		{"4", []string{"A="}, map[string]string{"A": ""}},
+		{"empty", []string{}, map[string]string{}},
+		{"empty entry", []string{""}, map[string]string{}},
+		{"key value", []string{"A=B"}, map[string]string{"A": "B"}},
+		{"equals in value", []string{"A=B=C"}, map[string]string{"A": "B=C"}},
+		{"empty value", []string{"A="}, map[string]string{"A": ""}},
 	}
 
 	for _, tc := range tt {

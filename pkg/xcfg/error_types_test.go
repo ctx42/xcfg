@@ -102,7 +102,7 @@ func Test_NewErrorf(t *testing.T) {
 		assert.Nil(t, e.MetaAll())
 	})
 
-	t.Run("wraps error via %w", func(t *testing.T) {
+	t.Run("wraps via w verb", func(t *testing.T) {
 		// --- Given ---
 		cause := errors.New("original")
 
@@ -134,7 +134,7 @@ func Test_NewErrorf(t *testing.T) {
 }
 
 func Test_NewFieldError(t *testing.T) {
-	t.Run("the error message includes the field name", func(t *testing.T) {
+	t.Run("message names field", func(t *testing.T) {
 		// --- Given ---
 		e := errors.New("msg")
 
@@ -161,7 +161,7 @@ func Test_NewFieldError(t *testing.T) {
 }
 
 func Test_NewFieldErrors(t *testing.T) {
-	t.Run("the error message includes all field names", func(t *testing.T) {
+	t.Run("message names all fields", func(t *testing.T) {
 		// --- Given ---
 		fields := map[string]error{
 			"field0": errors.New("msg0"),
@@ -177,7 +177,7 @@ func Test_NewFieldErrors(t *testing.T) {
 		xrrtest.AssertHasField(t, "field1", err)
 	})
 
-	t.Run("stores the map directly without copying", func(t *testing.T) {
+	t.Run("map not copied", func(t *testing.T) {
 		// --- Given ---
 		fields := map[string]error{"field0": errors.New("msg0")}
 		err := NewFieldErrors(fields)
@@ -228,7 +228,7 @@ func Test_IsConfigError(t *testing.T) {
 		assert.True(t, have)
 	})
 
-	t.Run("false for errors not from this domain", func(t *testing.T) {
+	t.Run("false for other domain", func(t *testing.T) {
 		// --- Given ---
 		err := errors.New("test message")
 

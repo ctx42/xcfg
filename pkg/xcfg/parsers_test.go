@@ -26,7 +26,7 @@ func Test_ParseTime(t *testing.T) {
 	})
 }
 
-func Test_ParseTime_tabular_errors(t *testing.T) {
+func Test_ParseTime_tabular(t *testing.T) {
 	tt := []struct {
 		testN string
 
@@ -35,13 +35,13 @@ func Test_ParseTime_tabular_errors(t *testing.T) {
 		wantMsg string
 	}{
 		{
-			"empty",
+			"error - empty",
 			"KEY_NAME",
 			"",
 			"KEY_NAME: config key not set (ECCfgKeyEmpty)",
 		},
 		{
-			"invalid format",
+			"error - invalid format",
 			"KEY_NAME",
 			"2001-01-02",
 			"" +
@@ -80,7 +80,7 @@ func Test_ParseDur(t *testing.T) {
 	})
 }
 
-func Test_ParseDur_tabular_errors(t *testing.T) {
+func Test_ParseDur_tabular(t *testing.T) {
 	tt := []struct {
 		testN string
 
@@ -89,13 +89,13 @@ func Test_ParseDur_tabular_errors(t *testing.T) {
 		wantMsg string
 	}{
 		{
-			"1",
+			"error - empty",
 			"KEY_NAME",
 			"",
 			"KEY_NAME: config key not set (ECCfgKeyEmpty)",
 		},
 		{
-			"2",
+			"error - invalid format",
 			"KEY_NAME",
 			"abc",
 			"" +
@@ -156,7 +156,7 @@ func Test_ParseInteger(t *testing.T) {
 	})
 }
 
-func Test_ParseInteger_tabular_errors(t *testing.T) {
+func Test_ParseInteger_tabular(t *testing.T) {
 	tt := []struct {
 		testN string
 
@@ -165,13 +165,13 @@ func Test_ParseInteger_tabular_errors(t *testing.T) {
 		wantMsg string
 	}{
 		{
-			"1",
+			"error - empty",
 			"KEY_NAME",
 			"",
 			"KEY_NAME: config key not set (ECCfgKeyEmpty)",
 		},
 		{
-			"2",
+			"error - invalid format",
 			"KEY_NAME",
 			"abc",
 			"" +
@@ -215,7 +215,7 @@ func Test_ParseTimezone(t *testing.T) {
 	})
 }
 
-func Test_ParseTimezone_tabular_errors(t *testing.T) {
+func Test_ParseTimezone_tabular(t *testing.T) {
 	tt := []struct {
 		testN string
 
@@ -224,13 +224,13 @@ func Test_ParseTimezone_tabular_errors(t *testing.T) {
 		wantMsg string
 	}{
 		{
-			"1",
+			"error - empty",
 			"KEY_NAME",
 			"",
 			"KEY_NAME: config key not set (ECCfgKeyEmpty)",
 		},
 		{
-			"2",
+			"error - unknown zone",
 			"KEY_NAME",
 			"Unknown/Timezone",
 			"" +
@@ -238,7 +238,7 @@ func Test_ParseTimezone_tabular_errors(t *testing.T) {
 				"unknown time zone Unknown/Timezone (ECCfgKeyInvValue)",
 		},
 		{
-			"3",
+			"error - invalid name",
 			"KEY_NAME",
 			"123 abc",
 			"" +
@@ -261,7 +261,36 @@ func Test_ParseTimezone_tabular_errors(t *testing.T) {
 	}
 }
 
-func Test_ParseBool_tabular_success(t *testing.T) {
+func Test_ParseBool(t *testing.T) {
+	t.Run("error - empty", func(t *testing.T) {
+		// --- When ---
+		have, err := ParseBool("KEY_NAME", "")
+
+		// --- Then ---
+		assert.SameType(t, &FieldErrors{}, err)
+		wMsg := "KEY_NAME: config key not set (ECCfgKeyEmpty)"
+		xrrtest.AssertEqual(t, wMsg, err)
+		xrrtest.AssertHasField(t, "KEY_NAME", err)
+		assert.False(t, have)
+	})
+
+	t.Run("error - invalid format", func(t *testing.T) {
+		// --- When ---
+		have, err := ParseBool("KEY_NAME", "abc")
+
+		// --- Then ---
+		assert.SameType(t, &FieldErrors{}, err)
+		wMsg := "" +
+			"KEY_NAME: invalid config key boolean format: " +
+			"strconv.ParseBool: parsing \"abc\": invalid syntax " +
+			"(ECCfgKeyInvFormat)"
+		xrrtest.AssertEqual(t, wMsg, err)
+		xrrtest.AssertHasField(t, "KEY_NAME", err)
+		assert.False(t, have)
+	})
+}
+
+func Test_ParseBool_tabular(t *testing.T) {
 	tt := []struct {
 		val  string
 		want bool
@@ -294,45 +323,6 @@ func Test_ParseBool_tabular_success(t *testing.T) {
 			// --- Then ---
 			assert.NoError(t, err)
 			assert.Equal(t, tc.want, have)
-		})
-	}
-}
-
-func Test_ParseBool_tabular_errors(t *testing.T) {
-	tt := []struct {
-		testN string
-
-		key     string
-		dur     string
-		wantMsg string
-	}{
-		{
-			"1",
-			"KEY_NAME",
-			"",
-			"KEY_NAME: config key not set (ECCfgKeyEmpty)",
-		},
-		{
-			"2",
-			"KEY_NAME",
-			"abc",
-			"" +
-				"KEY_NAME: invalid config key boolean format: " +
-				"strconv.ParseBool: parsing \"abc\": invalid syntax " +
-				"(ECCfgKeyInvFormat)",
-		},
-	}
-
-	for _, tc := range tt {
-		t.Run(tc.testN, func(t *testing.T) {
-			// --- When ---
-			have, err := ParseBool(tc.key, tc.dur)
-
-			// --- Then ---
-			assert.SameType(t, &FieldErrors{}, err)
-			xrrtest.AssertEqual(t, tc.wantMsg, err)
-			xrrtest.AssertHasField(t, tc.key, err)
-			assert.Zero(t, have)
 		})
 	}
 }

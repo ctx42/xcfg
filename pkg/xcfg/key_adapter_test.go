@@ -10,40 +10,34 @@ import (
 	"github.com/ctx42/xrr/pkg/xrr/xrrtest"
 )
 
-func Test_Adaptor(t *testing.T) {
+func Test_Adaptor_CfgKey(t *testing.T) {
 	t.Run("chained", func(t *testing.T) {
 		// --- Given ---
-		data := map[string]string{"A": "1", "XX_B": "2"}
-		cpv := Config(data)
+		cpv := Config{"A": "1", "XX_B": "2"}
+		adr := AddAdapter(ChangeAdapter(cpv, "YY", "XX"), "YY")
 
 		// --- When ---
-		have := ChangeAdapter(cpv, "YY", "XX")
-		have = AddAdapter(have, "YY")
+		have, err := adr.CfgKey("B")
 
 		// --- Then ---
-		value, err := have.CfgKey("B")
 		assert.NoError(t, err)
-		assert.Equal(t, "2", value)
+		assert.Equal(t, "2", have)
 	})
 
-	t.Run("chained error", func(t *testing.T) {
+	t.Run("error - chained missing key", func(t *testing.T) {
 		// --- Given ---
-		data := map[string]string{"A": "1", "XX_B": "2"}
-		cpv := Config(data)
+		cpv := Config{"A": "1", "XX_B": "2"}
+		adr := AddAdapter(ChangeAdapter(cpv, "YY", "XX"), "YY")
 
 		// --- When ---
-		have := ChangeAdapter(cpv, "YY", "XX")
-		have = AddAdapter(have, "YY")
+		have, err := adr.CfgKey("C")
 
 		// --- Then ---
-		value, err := have.CfgKey("C")
 		xrrtest.AssertFieldIs(t, "XX_C", ErrKeyMissing, err)
 		assert.ErrorEqual(t, "XX_C: config key missing", err)
-		assert.Equal(t, "", value)
+		assert.Equal(t, "", have)
 	})
-}
 
-func Test_Adaptor_CfgKey(t *testing.T) {
 	t.Run("error - zero value", func(t *testing.T) {
 		// --- Given ---
 		var adr Adaptor
@@ -97,62 +91,95 @@ func Test_Adaptor_CfgKeyAdapt(t *testing.T) {
 func Test_AddAdapter(t *testing.T) {
 	t.Run("existing key", func(t *testing.T) {
 		// --- Given ---
-		data := map[string]string{"A": "1", "XX_B": "2"}
-		cpv := Config(data)
+		adr := AddAdapter(Config{"A": "1", "XX_B": "2"}, "XX")
 
 		// --- When ---
-		have := AddAdapter(cpv, "XX")
+		have, err := adr.CfgKey("B")
 
 		// --- Then ---
-		value, err := have.CfgKey("B")
 		assert.NoError(t, err)
-		assert.Equal(t, "2", value)
+		assert.Equal(t, "2", have)
 	})
 
-	t.Run("not existing key", func(t *testing.T) {
+	t.Run("error - missing key", func(t *testing.T) {
 		// --- Given ---
-		data := map[string]string{"A": "1", "B": "2"}
-		cpv := Config(data)
+		adr := AddAdapter(Config{"A": "1", "B": "2"}, "XX")
 
 		// --- When ---
-		have := AddAdapter(cpv, "XX")
+		have, err := adr.CfgKey("NOT")
 
 		// --- Then ---
-		value, err := have.CfgKey("NOT")
 		xrrtest.AssertFieldIs(t, "XX_NOT", ErrKeyMissing, err)
 		assert.ErrorEqual(t, "XX_NOT: config key missing", err)
-		assert.Equal(t, "", value)
+		assert.Equal(t, "", have)
 	})
 }
 
 func Test_RemoveAdapter(t *testing.T) {
 	t.Run("key with prefix", func(t *testing.T) {
 		// --- Given ---
-		data := map[string]string{"A": "1", "B": "2"}
-		cpv := Config(data)
+		adr := RemoveAdapter(Config{"A": "1", "B": "2"}, "XX")
 
 		// --- When ---
-		have := RemoveAdapter(cpv, "XX")
+		have, err := adr.CfgKey("XX_A")
 
 		// --- Then ---
-		value, err := have.CfgKey("XX_A")
 		assert.NoError(t, err)
-		assert.Equal(t, "1", value)
+		assert.Equal(t, "1", have)
 	})
 
-	t.Run("not existing key", func(t *testing.T) {
+	t.Run("error - missing key", func(t *testing.T) {
 		// --- Given ---
-		data := map[string]string{"A": "1", "B": "2"}
-		cpv := Config(data)
+		adr := RemoveAdapter(Config{"A": "1", "B": "2"}, "XX")
 
 		// --- When ---
-		have := RemoveAdapter(cpv, "XX")
+		have, err := adr.CfgKey("NOT")
 
 		// --- Then ---
-		value, err := have.CfgKey("NOT")
 		xrrtest.AssertFieldIs(t, "NOT", ErrKeyMissing, err)
 		assert.ErrorEqual(t, "NOT: config key missing", err)
-		assert.Equal(t, "", value)
+		assert.Equal(t, "", have)
+	})
+}
+
+func Test_MapAdapter(t *testing.T) {
+	t.Run("nil map", func(t *testing.T) {
+		// --- Given ---
+		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
+		cpv := MapAdapter(Config(cfg), nil)
+
+		// --- When ---
+		have, err := cpv.CfgKey("A")
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, "1", have)
+	})
+
+	t.Run("error - missing key", func(t *testing.T) {
+		// --- Given ---
+		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
+		cpv := MapAdapter(Config(cfg), nil)
+
+		// --- When ---
+		have, err := cpv.CfgKey("D")
+
+		// --- Then ---
+		xrrtest.AssertFieldIs(t, "D", ErrKeyMissing, err)
+		assert.Equal(t, "", have)
+	})
+
+	t.Run("error - missing translated key", func(t *testing.T) {
+		// --- Given ---
+		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
+		cpv := MapAdapter(Config(cfg), map[string]string{"A": "D"})
+
+		// --- When ---
+		have, err := cpv.CfgKey("A")
+
+		// --- Then ---
+		xrrtest.AssertFieldIs(t, "D", ErrKeyMissing, err)
+		assert.Equal(t, "", have)
 	})
 }
 
@@ -194,47 +221,6 @@ func Test_MapAdapter_tabular(t *testing.T) {
 			assert.Equal(t, tc.want, have)
 		})
 	}
-}
-
-func Test_MapAdapter(t *testing.T) {
-	t.Run("nil map", func(t *testing.T) {
-		// --- Given ---
-		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
-		cpv := MapAdapter(Config(cfg), nil)
-
-		// --- When ---
-		have, err := cpv.CfgKey("A")
-
-		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, "1", have)
-	})
-
-	t.Run("not existing key", func(t *testing.T) {
-		// --- Given ---
-		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
-		cpv := MapAdapter(Config(cfg), nil)
-
-		// --- When ---
-		have, err := cpv.CfgKey("D")
-
-		// --- Then ---
-		xrrtest.AssertFieldIs(t, "D", ErrKeyMissing, err)
-		assert.Equal(t, "", have)
-	})
-
-	t.Run("not existing translated key", func(t *testing.T) {
-		// --- Given ---
-		cfg := map[string]string{"A": "1", "B": "2", "C": "3"}
-		cpv := MapAdapter(Config(cfg), map[string]string{"A": "D"})
-
-		// --- When ---
-		have, err := cpv.CfgKey("A")
-
-		// --- Then ---
-		xrrtest.AssertFieldIs(t, "D", ErrKeyMissing, err)
-		assert.Equal(t, "", have)
-	})
 }
 
 func Test_ChangeAdapter_tabular(t *testing.T) {

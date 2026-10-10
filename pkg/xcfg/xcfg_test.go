@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/ctx42/dotenv/pkg/dotenv"
 	"github.com/ctx42/testing/pkg/assert"
 	"github.com/ctx42/testing/pkg/must"
 	"github.com/ctx42/testkit/pkg/iokit"
@@ -21,53 +22,18 @@ import (
 )
 
 func Test_New(t *testing.T) {
-	t.Run("readr error", func(t *testing.T) {
+	t.Run("error - read failure", func(t *testing.T) {
 		// --- Given ---
 		fil := oskit.Open(t, "testdata/example0.conf")
 		er := iokit.ErrReader(fil, 10)
 
 		// --- When ---
-		cfg, err := New(er)
+		have, err := New(er)
 
 		// --- Then ---
 		assert.ErrorEqual(t, "config: read error", err)
 		assert.ErrorIs(t, iokit.ErrRead, err)
-		assert.Nil(t, cfg)
-	})
-
-	t.Run("cast map", func(t *testing.T) {
-		// --- Given ---
-		data := map[string]string{
-			"KEY_1": "VAL_1",
-			"KEY_2": "VAL_2",
-			"PTH":   "testdata",
-		}
-
-		// --- When ---
-		cfg := Config(data)
-
-		// --- Then ---
-		value, err := cfg.CfgKey("KEY_1")
-		assert.Equal(t, "VAL_1", value)
-		assert.NoError(t, err)
-
-		value, err = cfg.CfgKey("KEY_2")
-		assert.Equal(t, "VAL_2", value)
-		assert.NoError(t, err)
-
-		value, err = cfg.CfgKey("PTH")
-		assert.Equal(t, "testdata", value)
-		assert.NoError(t, err)
-
-		value, err = cfg.CfgKey("NOT_EXISTING")
-		assert.Equal(t, "", value)
-		xrrtest.AssertFieldIs(t, "NOT_EXISTING", ErrKeyMissing, err)
-		assert.ErrorEqual(t, "NOT_EXISTING: config key missing", err)
-
-		want := "testdata"
-		value, err = cfg.CfgKey("PTH")
-		assert.Equal(t, want, value)
-		assert.NoError(t, err)
+		assert.Nil(t, have)
 	})
 
 	t.Run("parse simple", func(t *testing.T) {
@@ -75,27 +41,25 @@ func Test_New(t *testing.T) {
 		rdr := bytes.NewReader([]byte("ONE=1\nTWO='2'\nTHREE = \"3\""))
 
 		// --- When ---
-		cfg, err := New(rdr)
+		have, err := New(rdr)
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"ONE":   "1",
 			"TWO":   "2",
 			"THREE": "3",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
 	t.Run("parse plain", func(t *testing.T) {
 		// --- When ---
-		cfg, err := New(xcfgtest.Open(t, "testdata/plain.conf"))
+		have, err := New(xcfgtest.Open(t, "testdata/plain.conf"))
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"OPTION_A": "1",
 			"OPTION_B": "2",
@@ -105,46 +69,43 @@ func Test_New(t *testing.T) {
 			"OPTION_F": "",
 			"OPTION_G": "",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
 	t.Run("parse exported", func(t *testing.T) {
 		// --- When ---
-		cfg, err := New(xcfgtest.Open(t, "testdata/exported.conf"))
+		have, err := New(xcfgtest.Open(t, "testdata/exported.conf"))
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"OPTION_A": "2",
 			"OPTION_B": "\\n",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
 	t.Run("parse equals", func(t *testing.T) {
 		// --- When ---
-		cfg, err := New(xcfgtest.Open(t, "testdata/equals.conf"))
+		have, err := New(xcfgtest.Open(t, "testdata/equals.conf"))
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"OPTION_A": "postgres://localhost:5432/database?sslmode=disable",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
 	t.Run("parse quoted", func(t *testing.T) {
 		// --- When ---
-		cfg, err := New(xcfgtest.Open(t, "testdata/quoted.conf"))
+		have, err := New(xcfgtest.Open(t, "testdata/quoted.conf"))
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"OPTION_A": "1",
 			"OPTION_B": "2",
@@ -156,17 +117,16 @@ func Test_New(t *testing.T) {
 			"OPTION_H": "\n",
 			"OPTION_I": "echo 'asd'",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
 	t.Run("parse substitutions", func(t *testing.T) {
 		// --- When ---
-		cfg, err := New(xcfgtest.Open(t, "testdata/substitutions.conf"))
+		have, err := New(xcfgtest.Open(t, "testdata/substitutions.conf"))
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"OPTION_A": "1",
 			"OPTION_B": "1",
@@ -174,8 +134,8 @@ func Test_New(t *testing.T) {
 			"OPTION_D": "11",
 			"OPTION_E": "",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
 	t.Run("parse base64 encoded string", func(t *testing.T) {
@@ -183,71 +143,74 @@ func Test_New(t *testing.T) {
 		rdr := bytes.NewReader([]byte("base64:QT1CCkM9RAo"))
 
 		// --- When ---
-		cfg, err := New(rdr)
+		have, err := New(rdr)
 
 		// --- Then ---
 		assert.NoError(t, err)
-
 		want := map[string]string{
 			"A": "B",
 			"C": "D",
 		}
-		assert.Equal(t, Config(want), cfg)
-		assert.Len(t, len(want), cfg)
+		assert.Equal(t, Config(want), have)
+		assert.Len(t, len(want), have)
 	})
 
-	t.Run("parse invalid file", func(t *testing.T) {
+	t.Run("error - invalid line", func(t *testing.T) {
 		// --- When ---
-		cfg, err := New(xcfgtest.Open(t, "testdata/invalid1.conf"))
+		have, err := New(xcfgtest.Open(t, "testdata/invalid1.conf"))
 
 		// --- Then ---
-		assert.Error(t, err)
-		assert.Nil(t, cfg)
+		assert.ErrorIs(t, dotenv.ErrInvLine, err)
+		assert.Nil(t, have)
 	})
 }
 
 func Test_NewFromPath(t *testing.T) {
-	t.Run("empty path nil env", func(t *testing.T) {
+	t.Run("error - empty path", func(t *testing.T) {
 		// --- When ---
-		cfg, err := NewFromPath("")
+		have, err := NewFromPath("")
 
 		// --- Then ---
 		assert.ErrorIs(t, ErrCfgFileNotFound, err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
-	t.Run("empty path env set", func(t *testing.T) {
-		// --- When ---
+	t.Run("error - empty path with env", func(t *testing.T) {
+		// --- Given ---
 		env := []string{"A=B"}
-		cfg, err := NewFromPath("", WithEnv(env))
+
+		// --- When ---
+		have, err := NewFromPath("", WithEnv(env))
 
 		// --- Then ---
 		assert.ErrorIs(t, ErrCfgFileNotFound, err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
-	t.Run("not existing path nil env", func(t *testing.T) {
+	t.Run("error - not existing path", func(t *testing.T) {
 		// --- When ---
-		cfg, err := NewFromPath("testdata/not_existing.conf")
+		have, err := NewFromPath("testdata/not_existing.conf")
 
 		// --- Then ---
 		assert.ErrorIs(t, ErrCfgFileNotFound, err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
-	t.Run("not existing path env set", func(t *testing.T) {
-		// --- When ---
+	t.Run("error - not existing path with env", func(t *testing.T) {
+		// --- Given ---
 		env := []string{"A=B"}
-		cfg, err := NewFromPath("testdata/not_existing.conf", WithEnv(env))
+
+		// --- When ---
+		have, err := NewFromPath("testdata/not_existing.conf", WithEnv(env))
 
 		// --- Then ---
 		assert.ErrorIs(t, ErrCfgFileNotFound, err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
 	t.Run("error - path is a directory", func(t *testing.T) {
 		// --- When ---
-		cfg, err := NewFromPath("testdata")
+		have, err := NewFromPath("testdata")
 
 		// --- Then ---
 		assert.ErrorIs(t, ErrCfgFileNotFound, err)
@@ -255,49 +218,49 @@ func Test_NewFromPath(t *testing.T) {
 		xrrtest.AssertCode(t, ECCfgFileNotFound, err)
 		wMsg := "config file not found; read testdata: is a directory"
 		assert.ErrorEqual(t, wMsg, err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
-	t.Run("existing path nil env", func(t *testing.T) {
+	t.Run("existing path", func(t *testing.T) {
 		// --- When ---
-		cfg, err := NewFromPath("testdata/example1.conf")
+		have, err := NewFromPath("testdata/example1.conf")
 
 		// --- Then ---
 		assert.NoError(t, err)
-		value, err := cfg.CfgKey("VALUE")
-		assert.NoError(t, err)
-		assert.Equal(t, "1", value)
+		assert.Equal(t, Config{"VALUE": "1"}, have)
 	})
 
-	t.Run("matching keys overwritten from environment", func(t *testing.T) {
+	t.Run("env overrides matching keys", func(t *testing.T) {
+		// --- Given ---
+		env := []string{"VALUE=42", "OTHER=1"}
+
 		// --- When ---
-		env := []string{"VALUE=42"}
-		cfg, err := NewFromPath("testdata/example1.conf", WithEnv(env))
+		have, err := NewFromPath("testdata/example1.conf", WithEnv(env))
 
 		// --- Then ---
 		assert.NoError(t, err)
-		value, err := cfg.CfgKey("VALUE")
-		assert.NoError(t, err)
-		assert.Equal(t, "42", value)
+		assert.Equal(t, Config{"VALUE": "42"}, have)
 	})
 
-	t.Run("invalid config nil env", func(t *testing.T) {
+	t.Run("error - invalid config", func(t *testing.T) {
 		// --- When ---
-		cfg, err := NewFromPath("testdata/invalid1.conf")
+		have, err := NewFromPath("testdata/invalid1.conf")
 
 		// --- Then ---
 		assert.ErrorEqual(t, "config: dotenv: invalid config line: 1", err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
-	t.Run("invalid config env set", func(t *testing.T) {
-		// --- When ---
+	t.Run("error - invalid config with env", func(t *testing.T) {
+		// --- Given ---
 		env := []string{"A=B"}
-		cfg, err := NewFromPath("testdata/invalid1.conf", WithEnv(env))
+
+		// --- When ---
+		have, err := NewFromPath("testdata/invalid1.conf", WithEnv(env))
 
 		// --- Then ---
 		assert.ErrorEqual(t, "config: dotenv: invalid config line: 1", err)
-		assert.Nil(t, cfg)
+		assert.Nil(t, have)
 	})
 
 	t.Run("options built as a list", func(t *testing.T) {
@@ -314,11 +277,12 @@ func Test_NewFromPath(t *testing.T) {
 	})
 
 	t.Run("encoded path updated by env", func(t *testing.T) {
-		// --- When ---
+		// --- Given ---
 		enc := base64.RawURLEncoding.EncodeToString([]byte("A=B\nC=D\nE=F"))
-		pth := "base64:" + enc
 		env := []string{"A=G"}
-		cfg, err := NewFromPath(pth, WithEnv(env))
+
+		// --- When ---
+		have, err := NewFromPath("base64:"+enc, WithEnv(env))
 
 		// --- Then ---
 		assert.NoError(t, err)
@@ -327,7 +291,7 @@ func Test_NewFromPath(t *testing.T) {
 			"C": "D",
 			"E": "F",
 		}
-		assert.Equal(t, want, cfg)
+		assert.Equal(t, want, have)
 	})
 }
 
@@ -336,17 +300,10 @@ func Test_NewFromEnv(t *testing.T) {
 	env := []string{"A=B", "C=D"}
 
 	// --- When ---
-	cfg := NewFromEnv(env)
+	have := NewFromEnv(env)
 
 	// --- Then ---
-	val, err := cfg.CfgKey("A")
-	assert.NoError(t, err)
-	assert.Equal(t, "B", val)
-
-	val, err = cfg.CfgKey("E")
-	xrrtest.AssertFieldIs(t, "E", ErrKeyMissing, err)
-	assert.ErrorEqual(t, "E: config key missing", err)
-	assert.Equal(t, "", val)
+	assert.Equal(t, Config{"A": "B", "C": "D"}, have)
 }
 
 func Test_Config_CfgKey(t *testing.T) {
@@ -374,7 +331,7 @@ func Test_Config_CfgKey(t *testing.T) {
 		assert.Equal(t, "0", have)
 	})
 
-	t.Run("get not existing", func(t *testing.T) {
+	t.Run("error - missing key", func(t *testing.T) {
 		// --- Given ---
 		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 
@@ -400,7 +357,7 @@ func Test_Config_CfgKey(t *testing.T) {
 		assert.Equal(t, "0", have)
 	})
 
-	t.Run("key not in file but in env", func(t *testing.T) {
+	t.Run("error - key only in env", func(t *testing.T) {
 		// --- Given ---
 		cpv := xcfgtest.NewFromPath(t, "testdata/example0.conf")
 		t.Setenv("VALUE_ENV", "123")
@@ -440,34 +397,6 @@ func Test_Config_Marshal_tabular(t *testing.T) {
 
 			// --- Then ---
 			assert.Equal(t, tc.want, have)
-		})
-	}
-}
-
-func Test_Config_Unmarshal_Marshal(t *testing.T) {
-	tt := []struct {
-		testN string
-
-		fixture string
-	}{
-		{"1", "testdata/equals.conf"},
-		{"2", "testdata/exported.conf"},
-		{"3", "testdata/plain.conf"},
-		{"4", "testdata/quoted.conf"},
-	}
-
-	for _, tc := range tt {
-		t.Run(tc.testN, func(t *testing.T) {
-			// --- Given ---
-			cfg, err := New(xcfgtest.Open(t, tc.fixture))
-			assert.NoError(t, err)
-
-			// --- When ---
-			have, err := Unmarshal(cfg.Marshal())
-
-			// --- Then ---
-			assert.NoError(t, err)
-			assert.Equal(t, cfg, have)
 		})
 	}
 }
@@ -528,4 +457,51 @@ func Test_Config_SetFrom(t *testing.T) {
 		// --- Then ---
 		assert.Equal(t, Config{"KEY": "VAL"}, have)
 	})
+}
+
+func Test_Unmarshal(t *testing.T) {
+	t.Run("parse", func(t *testing.T) {
+		// --- When ---
+		have, err := Unmarshal("A=B\nC='D'")
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, Config{"A": "B", "C": "D"}, have)
+	})
+
+	t.Run("error - invalid line", func(t *testing.T) {
+		// --- When ---
+		have, err := Unmarshal("INVALID LINE")
+
+		// --- Then ---
+		assert.ErrorIs(t, dotenv.ErrInvLine, err)
+		assert.Nil(t, have)
+	})
+}
+
+func Test_Unmarshal_tabular(t *testing.T) {
+	tt := []struct {
+		testN string
+
+		fixture string
+	}{
+		{"equals", "testdata/equals.conf"},
+		{"exported", "testdata/exported.conf"},
+		{"plain", "testdata/plain.conf"},
+		{"quoted", "testdata/quoted.conf"},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.testN, func(t *testing.T) {
+			// --- Given ---
+			cfg := must.Value(New(xcfgtest.Open(t, tc.fixture)))
+
+			// --- When ---
+			have, err := Unmarshal(cfg.Marshal())
+
+			// --- Then ---
+			assert.NoError(t, err)
+			assert.Equal(t, cfg, have)
+		})
+	}
 }

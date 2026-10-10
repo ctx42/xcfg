@@ -19,7 +19,7 @@ func Test_CheckDirExists(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("dir does not exist", func(t *testing.T) {
+	t.Run("error - dir does not exist", func(t *testing.T) {
 		// --- When ---
 		err := CheckDirExists("KEY_NAME", "/not/existing/dir")
 
@@ -30,7 +30,7 @@ func Test_CheckDirExists(t *testing.T) {
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
 	})
 
-	t.Run("path under a file", func(t *testing.T) {
+	t.Run("error - path under a file", func(t *testing.T) {
 		// --- When ---
 		err := CheckDirExists("KEY_NAME", "testdata/equals.conf/sub")
 
@@ -40,7 +40,7 @@ func Test_CheckDirExists(t *testing.T) {
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
 	})
 
-	t.Run("dir is a file", func(t *testing.T) {
+	t.Run("error - dir is a file", func(t *testing.T) {
 		// --- When ---
 		err := CheckDirExists("KEY_NAME", "testdata/equals.conf")
 
@@ -51,7 +51,7 @@ func Test_CheckDirExists(t *testing.T) {
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
 	})
 
-	t.Run("empty", func(t *testing.T) {
+	t.Run("error - empty", func(t *testing.T) {
 		// --- When ---
 		err := CheckDirExists("KEY_NAME", "")
 
@@ -71,7 +71,7 @@ func Test_CheckAbsPath(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("relative path", func(t *testing.T) {
+	t.Run("error - relative path", func(t *testing.T) {
 		// --- When ---
 		err := CheckAbsPath("KEY_NAME", "abs/path")
 
@@ -81,7 +81,7 @@ func Test_CheckAbsPath(t *testing.T) {
 		xrrtest.AssertHasField(t, "KEY_NAME", err)
 	})
 
-	t.Run("empty", func(t *testing.T) {
+	t.Run("error - empty", func(t *testing.T) {
 		// --- When ---
 		err := CheckAbsPath("KEY_NAME", "")
 

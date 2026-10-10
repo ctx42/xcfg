@@ -53,7 +53,11 @@ func Test_Prefix_tabular(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.testN, func(t *testing.T) {
-			assert.Equal(t, tc.want, Prefix(tc.prefix, tc.key))
+			// --- When ---
+			have := Prefix(tc.prefix, tc.key)
+
+			// --- Then ---
+			assert.Equal(t, tc.want, have)
 		})
 	}
 }
@@ -74,7 +78,11 @@ func Test_StripPrefix_tabular(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.testN, func(t *testing.T) {
-			assert.Equal(t, tc.want, StripPrefix(tc.prefix, tc.key))
+			// --- When ---
+			have := StripPrefix(tc.prefix, tc.key)
+
+			// --- Then ---
+			assert.Equal(t, tc.want, have)
 		})
 	}
 }
