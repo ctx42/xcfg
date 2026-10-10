@@ -66,6 +66,22 @@ func Test_FakeLoad(t *testing.T) {
 		// --- Then ---
 		assert.Nil(t, cpf)
 	})
+
+	t.Run("loads after an earlier failure", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.ExpectError()
+		tspy.ExpectLogEqual("earlier failure")
+		tspy.Close()
+
+		tspy.Error("earlier failure")
+
+		// --- When ---
+		have := FakeLoad(tspy, "../testdata/example0.conf")
+
+		// --- Then ---
+		assert.NotNil(t, have)
+	})
 }
 
 func Test_Fake_Reader(t *testing.T) {

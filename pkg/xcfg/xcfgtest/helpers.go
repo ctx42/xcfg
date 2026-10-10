@@ -27,7 +27,7 @@ func Open(t tester.T, pth string) *bytes.Reader {
 func NewFromPath(t tester.T, pth string) xcfg.Provider {
 	t.Helper()
 	rdr := Open(t, pth)
-	if t.Failed() {
+	if rdr == nil {
 		return nil
 	}
 

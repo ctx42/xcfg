@@ -41,7 +41,7 @@ func FakeLoad(t tester.T, pth string) *Fake {
 	t.Helper()
 
 	rdr := Open(t, pth)
-	if t.Failed() {
+	if rdr == nil {
 		return nil
 	}
 
