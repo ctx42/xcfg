@@ -4,6 +4,7 @@
 package xcfg
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -43,7 +44,11 @@ func Test_ParseTime_tabular_errors(t *testing.T) {
 			"invalid format",
 			"KEY_NAME",
 			"2001-01-02",
-			"KEY_NAME: invalid config key RFC3339 format (ECCfgKeyInvFormat)",
+			"" +
+				"KEY_NAME: invalid config key RFC3339 format: " +
+				"parsing time \"2001-01-02\" as " +
+				"\"2006-01-02T15:04:05.999999999Z07:00\": " +
+				"cannot parse \"\" as \"T\" (ECCfgKeyInvFormat)",
 		},
 	}
 
@@ -93,7 +98,9 @@ func Test_ParseDur_tabular_errors(t *testing.T) {
 			"2",
 			"KEY_NAME",
 			"abc",
-			"KEY_NAME: invalid config key duration format (ECCfgKeyInvFormat)",
+			"" +
+				"KEY_NAME: invalid config key duration format: " +
+				"time: invalid duration \"abc\" (ECCfgKeyInvFormat)",
 		},
 	}
 
@@ -119,6 +126,24 @@ func Test_ParseInteger(t *testing.T) {
 		// --- Then ---
 		assert.NoError(t, err)
 		assert.Equal(t, 123, have)
+	})
+
+	t.Run("beyond int32", func(t *testing.T) {
+		// --- When ---
+		have, err := ParseInteger("KEY_NAME", "3000000000")
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, 3000000000, have)
+	})
+
+	t.Run("error - cause kept", func(t *testing.T) {
+		// --- When ---
+		have, err := ParseInteger("KEY_NAME", "abc")
+
+		// --- Then ---
+		assert.ErrorIs(t, strconv.ErrSyntax, err)
+		assert.Equal(t, 0, have)
 	})
 
 	t.Run("error - empty string", func(t *testing.T) {
@@ -149,7 +174,10 @@ func Test_ParseInteger_tabular_errors(t *testing.T) {
 			"2",
 			"KEY_NAME",
 			"abc",
-			"KEY_NAME: invalid config key integer format (ECCfgKeyInvFormat)",
+			"" +
+				"KEY_NAME: invalid config key integer format: " +
+				"strconv.Atoi: parsing \"abc\": invalid syntax " +
+				"(ECCfgKeyInvFormat)",
 		},
 	}
 
@@ -205,13 +233,17 @@ func Test_ParseTimezone_tabular_errors(t *testing.T) {
 			"2",
 			"KEY_NAME",
 			"Unknown/Timezone",
-			"KEY_NAME: invalid config key timezone value (ECCfgKeyInvValue)",
+			"" +
+				"KEY_NAME: invalid config key timezone value: " +
+				"unknown time zone Unknown/Timezone (ECCfgKeyInvValue)",
 		},
 		{
 			"3",
 			"KEY_NAME",
 			"123 abc",
-			"KEY_NAME: invalid config key timezone value (ECCfgKeyInvValue)",
+			"" +
+				"KEY_NAME: invalid config key timezone value: " +
+				"unknown time zone 123 abc (ECCfgKeyInvValue)",
 		},
 	}
 
@@ -284,7 +316,10 @@ func Test_ParseBool_tabular_errors(t *testing.T) {
 			"2",
 			"KEY_NAME",
 			"abc",
-			"KEY_NAME: invalid config key boolean format (ECCfgKeyInvFormat)",
+			"" +
+				"KEY_NAME: invalid config key boolean format: " +
+				"strconv.ParseBool: parsing \"abc\": invalid syntax " +
+				"(ECCfgKeyInvFormat)",
 		},
 	}
 

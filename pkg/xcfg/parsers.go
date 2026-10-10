@@ -6,6 +6,8 @@ package xcfg
 import (
 	"strconv"
 	"time"
+
+	"github.com/ctx42/xrr/pkg/xrr"
 )
 
 // ParseTime parses a configuration key as RFC3339 time.
@@ -16,7 +18,8 @@ func ParseTime(key, val string) (time.Time, error) {
 
 	tim, err := time.Parse(time.RFC3339Nano, val)
 	if err != nil {
-		err = NewError("invalid config key RFC3339 format", ECCfgKeyInvFormat)
+		msg := "invalid config key RFC3339 format"
+		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
 		return time.Time{}, NewFieldError(key, err)
 	}
 	return tim, nil
@@ -31,7 +34,8 @@ func ParseDur(key, val string) (time.Duration, error) {
 	var t time.Duration
 	var err error
 	if t, err = time.ParseDuration(val); err != nil {
-		err = NewError("invalid config key duration format", ECCfgKeyInvFormat)
+		msg := "invalid config key duration format"
+		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
 		return 0, NewFieldError(key, err)
 	}
 	return t, nil
@@ -43,12 +47,13 @@ func ParseInteger(key, val string) (int, error) {
 		return 0, NewFieldError(key, ErrKeyEmpty)
 	}
 
-	i, err := strconv.ParseInt(val, 10, 32)
+	i, err := strconv.Atoi(val)
 	if err != nil {
-		err = NewError("invalid config key integer format", ECCfgKeyInvFormat)
+		msg := "invalid config key integer format"
+		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
 		return 0, NewFieldError(key, err)
 	}
-	return int(i), nil
+	return i, nil
 }
 
 // ParseTimezone parses a configuration key as timezone.
@@ -59,7 +64,8 @@ func ParseTimezone(key, val string) (*time.Location, error) {
 
 	loc, err := time.LoadLocation(val)
 	if err != nil {
-		err = NewError("invalid config key timezone value", ECCfgKeyInvValue)
+		msg := "invalid config key timezone value"
+		err = NewError(msg, ECCfgKeyInvValue, xrr.WithCause(err))
 		return nil, NewFieldError(key, err)
 	}
 	return loc, nil
@@ -83,7 +89,8 @@ func ParseBool(key, val string) (bool, error) {
 
 	b, err := strconv.ParseBool(val)
 	if err != nil {
-		err = NewError("invalid config key boolean format", ECCfgKeyInvFormat)
+		msg := "invalid config key boolean format"
+		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
 		return false, NewFieldError(key, err)
 	}
 	return b, nil
