@@ -1,7 +1,11 @@
 github.com/ctx42/dotenv v0.5.0 h1:N/hJxiAjGPH6u6VTBDuC8wb0BAU/PT8fPDyXdGofbbA=
 github.com/ctx42/dotenv v0.5.0/go.mod h1:ft58DuSyXfNtoVxEzpTY8jmVcpkPxHK6zCLcfE6Ondc=
+github.com/ctx42/dotenv v0.6.0 h1:7vocJn+CrLWh6lmwoUxgjZ/LcTvnDAKb+j6MBgBf750=
+github.com/ctx42/dotenv v0.6.0/go.mod h1:ft58DuSyXfNtoVxEzpTY8jmVcpkPxHK6zCLcfE6Ondc=
 github.com/ctx42/testing v0.56.0 h1:+yZwRy+5JQb+14YtRTGJxWbAMAP9qlU9pMa8TPqgdzE=
 github.com/ctx42/testing v0.56.0/go.mod h1:wRBqNRtlxDZnXIjgCX3zr05Acl6JC1D6cSBN2IpaMIs=
+github.com/ctx42/testing v0.57.0 h1:Kl649LT2rWVMZGXRMDxUSvdd/CF+AOcmXh40gBEPejc=
+github.com/ctx42/testing v0.57.0/go.mod h1:wRBqNRtlxDZnXIjgCX3zr05Acl6JC1D6cSBN2IpaMIs=
 github.com/ctx42/testkit v0.16.0 h1:HIlCmiFg+uYD746HPa2Jn4PQk50jzVRRHw4y33cLbcI=
 github.com/ctx42/testkit v0.16.0/go.mod h1:2jFaBljQ01ShsJSo6qz8fWOdVaWL7NLPF+J0txRynoo=
 github.com/ctx42/xrr v0.18.0 h1:n4fo2pOV2d/gzaa+QBlIkjrjFZIuUpg/ym3Z5bCnV/A=
