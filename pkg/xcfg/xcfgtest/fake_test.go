@@ -146,9 +146,7 @@ func Test_Fake_Set(t *testing.T) {
 				cpf.Set("KEY", tc.val)
 
 				// --- Then ---
-				val, err := cpf.CfgKey("KEY")
-				assert.NoError(t, err)
-				assert.Equal(t, tc.want, val)
+				assert.Equal(t, tc.want, must.Value(cpf.CfgKey("KEY")))
 			})
 		}
 	})
@@ -188,13 +186,9 @@ func Test_Fake_SetFrom(t *testing.T) {
 	cpf.SetFrom(m)
 
 	// --- Then ---
-	val, err := cpf.CfgKey("KEY0")
-	assert.NoError(t, err)
-	assert.Equal(t, "VAL99", val)
+	assert.Equal(t, "VAL99", must.Value(cpf.CfgKey("KEY0")))
 
-	val, err = cpf.CfgKey("KEY1")
-	assert.NoError(t, err)
-	assert.Equal(t, "VAL1", val)
+	assert.Equal(t, "VAL1", must.Value(cpf.CfgKey("KEY1")))
 }
 
 func Test_Fake_SetFromWithPrefix(t *testing.T) {
@@ -214,13 +208,9 @@ func Test_Fake_SetFromWithPrefix(t *testing.T) {
 		cpf.SetFromWithPrefix("", m)
 
 		// --- Then ---
-		val, err := cpf.CfgKey("KEY0")
-		assert.NoError(t, err)
-		assert.Equal(t, "VAL99", val)
+		assert.Equal(t, "VAL99", must.Value(cpf.CfgKey("KEY0")))
 
-		val, err = cpf.CfgKey("KEY1")
-		assert.NoError(t, err)
-		assert.Equal(t, "VAL1", val)
+		assert.Equal(t, "VAL1", must.Value(cpf.CfgKey("KEY1")))
 	})
 
 	t.Run("with prefix", func(t *testing.T) {
@@ -239,13 +229,9 @@ func Test_Fake_SetFromWithPrefix(t *testing.T) {
 		cpf.SetFromWithPrefix("PREF", m)
 
 		// --- Then ---
-		val, err := cpf.CfgKey("PREF_KEY0")
-		assert.NoError(t, err)
-		assert.Equal(t, "VAL99", val)
+		assert.Equal(t, "VAL99", must.Value(cpf.CfgKey("PREF_KEY0")))
 
-		val, err = cpf.CfgKey("PREF_KEY1")
-		assert.NoError(t, err)
-		assert.Equal(t, "VAL1", val)
+		assert.Equal(t, "VAL1", must.Value(cpf.CfgKey("PREF_KEY1")))
 	})
 
 	t.Run("empty key with prefix", func(t *testing.T) {

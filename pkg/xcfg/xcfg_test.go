@@ -438,13 +438,9 @@ func Test_Config_SetFrom(t *testing.T) {
 		// --- Then ---
 		assert.Same(t, cfg, have)
 
-		val, err := cfg.CfgKey("KEY0")
-		assert.NoError(t, err)
-		assert.Equal(t, "VAL99", val)
+		assert.Equal(t, "VAL99", must.Value(cfg.CfgKey("KEY0")))
 
-		val, err = cfg.CfgKey("KEY1")
-		assert.NoError(t, err)
-		assert.Equal(t, "VAL1", val)
+		assert.Equal(t, "VAL1", must.Value(cfg.CfgKey("KEY1")))
 	})
 
 	t.Run("nil config", func(t *testing.T) {
