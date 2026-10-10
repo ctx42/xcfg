@@ -112,7 +112,7 @@ func Test_NewErrorf(t *testing.T) {
 		// --- Then ---
 		e, _ := assert.SameType(t, &Error{}, err)
 		assert.ErrorEqual(t, "connect failed: original", err)
-		assert.True(t, errors.Is(err, cause))
+		assert.ErrorIs(t, cause, err)
 		xrrtest.AssertCode(t, xrr.ECGeneric, e)
 		assert.Nil(t, e.MetaAll())
 	})
@@ -127,7 +127,7 @@ func Test_NewErrorf(t *testing.T) {
 		// --- Then ---
 		e, _ := assert.SameType(t, &Error{}, err)
 		assert.ErrorEqual(t, "connect failed: original", err)
-		assert.True(t, errors.Is(err, cause))
+		assert.ErrorIs(t, cause, err)
 		xrrtest.AssertCode(t, "ECTst", e)
 		assert.Nil(t, e.MetaAll())
 	})
