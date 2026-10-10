@@ -67,13 +67,8 @@ func FakeLoad(t tester.T, pth string) *Fake {
 func (cpf *Fake) Reader() io.Reader {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
-	cpf.t.Helper()
 
-	vss := make(map[string]string, len(cpf.cfg))
-	for k, v := range cpf.cfg {
-		vss[k] = anyToStr(cpf.t, v)
-	}
-	return strings.NewReader(xcfg.Config(vss).Marshal())
+	return strings.NewReader(xcfg.Config(cpf.cfg).Marshal())
 }
 
 // Set sets the key to the string form of the value and returns the [Fake].
@@ -137,7 +132,7 @@ func (cpf *Fake) CfgKey(key string) (string, error) {
 	cpf.t.Helper()
 
 	if val, ok := cpf.cfg[key]; ok {
-		return anyToStr(cpf.t, val), nil
+		return val, nil
 	}
 	return "", xcfg.NewFieldError(key, xcfg.ErrKeyMissing)
 }
