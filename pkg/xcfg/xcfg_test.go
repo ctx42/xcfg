@@ -389,6 +389,35 @@ func Test_Config_CfgKey(t *testing.T) {
 	})
 }
 
+func Test_Config_Marshal_tabular(t *testing.T) {
+	tt := []struct {
+		testN string
+
+		val  string
+		want string
+	}{
+		{"integer", "42", "K=42"},
+		{"negative integer", "-42", "K=-42"},
+		{"leading zero", "0755", `K="0755"`},
+		{"plus sign", "+1", `K="+1"`},
+		{"string", "abc", `K="abc"`},
+		{"escaped", "a\"$\n", `K="a\"\$\n"`},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.testN, func(t *testing.T) {
+			// --- Given ---
+			cfg := Config{"K": tc.val}
+
+			// --- When ---
+			have := cfg.Marshal()
+
+			// --- Then ---
+			assert.Equal(t, tc.want, have)
+		})
+	}
+}
+
 func Test_Config_Unmarshal_Marshal(t *testing.T) {
 	tt := []struct {
 		testN string

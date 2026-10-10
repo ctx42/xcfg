@@ -152,8 +152,8 @@ func (cfg Config) CfgKey(key string) (string, error) {
 func (cfg Config) Marshal() string {
 	lns := make([]string, 0, len(cfg))
 	for k, v := range cfg {
-		if d, err := strconv.Atoi(v); err == nil {
-			lns = append(lns, fmt.Sprintf(`%s=%d`, k, d))
+		if d, err := strconv.Atoi(v); err == nil && strconv.Itoa(d) == v {
+			lns = append(lns, k+"="+v)
 		} else {
 			//nolint:gocritic
 			lns = append(lns, fmt.Sprintf(`%s="%s"`, k, doubleQuoteEscape(v)))
