@@ -72,7 +72,10 @@ type Adapter interface {
 
 var _ Provider = Config{} // Compile time check.
 
-// options represent [NewFromPath] options.
+// Option configures [NewFromPath].
+type Option func(*options)
+
+// options holds the settings [Option] values configure.
 type options struct {
 	env []string
 }
@@ -80,7 +83,7 @@ type options struct {
 // WithEnv is option for [NewFromPath] setting environment to overwrite keys.
 // The keys in the config matching keys present in the environment will be
 // overwritten.
-func WithEnv(env []string) func(*options) {
+func WithEnv(env []string) Option {
 	return func(opts *options) { opts.env = env }
 }
 
@@ -104,7 +107,7 @@ func New(r io.Reader) (Config, error) {
 // NewFromPath creates [Config] from `pth`. When `pth` starts with the
 // `base64:` prefix, it is treated as the Base64 encoded configuration itself
 // rather than a file path.
-func NewFromPath(pth string, opts ...func(*options)) (Config, error) {
+func NewFromPath(pth string, opts ...Option) (Config, error) {
 	def := &options{}
 	for _, opt := range opts {
 		opt(def)

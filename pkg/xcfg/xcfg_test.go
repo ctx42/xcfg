@@ -301,6 +301,19 @@ func Test_NewFromPath(t *testing.T) {
 		assert.Nil(t, cfg)
 	})
 
+	t.Run("options built as a list", func(t *testing.T) {
+		// --- Given ---
+		var opts []Option
+		opts = append(opts, WithEnv([]string{"VALUE=42"}))
+
+		// --- When ---
+		have, err := NewFromPath("testdata/example1.conf", opts...)
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, Config{"VALUE": "42"}, have)
+	})
+
 	t.Run("encoded path updated by env", func(t *testing.T) {
 		// --- When ---
 		enc := base64.RawURLEncoding.EncodeToString([]byte("A=B\nC=D\nE=F"))
