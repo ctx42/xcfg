@@ -113,43 +113,6 @@ func Test_Fake_Reader(t *testing.T) {
 }
 
 func Test_Fake_Set(t *testing.T) {
-	t.Run("set", func(t *testing.T) {
-		tt := []struct {
-			testN string
-
-			val  any
-			want string
-		}{
-			{"string", "abc", "abc"},
-			{"int", 1, "1"},
-			{"float32", float32(1.23), "1.23"},
-			{"float64", 1.23, "1.23"},
-			{"duration", time.Second, "1s"},
-			{"location", time.UTC, "UTC"},
-			{
-				"time",
-				time.Date(2021, 9, 10, 13, 23, 24, 123, time.UTC),
-				"2021-09-10T13:23:24.000000123Z",
-			},
-		}
-
-		for _, tc := range tt {
-			t.Run(tc.testN, func(t *testing.T) {
-				// --- Given ---
-				tspy := tester.New(t)
-				tspy.Close()
-
-				cpf := NewFake(tspy)
-
-				// --- When ---
-				cpf.Set("KEY", tc.val)
-
-				// --- Then ---
-				assert.Equal(t, tc.want, must.Value(cpf.CfgKey("KEY")))
-			})
-		}
-	})
-
 	t.Run("error - unsupported type", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
@@ -167,6 +130,43 @@ func Test_Fake_Set(t *testing.T) {
 		xrrtest.AssertFieldIs(t, "KEY", xcfg.ErrKeyMissing, err)
 		assert.Equal(t, "", val)
 	})
+}
+
+func Test_Fake_Set_tabular(t *testing.T) {
+	tt := []struct {
+		testN string
+
+		val  any
+		want string
+	}{
+		{"string", "abc", "abc"},
+		{"int", 1, "1"},
+		{"float32", float32(1.23), "1.23"},
+		{"float64", 1.23, "1.23"},
+		{"duration", time.Second, "1s"},
+		{"location", time.UTC, "UTC"},
+		{
+			"time",
+			time.Date(2021, 9, 10, 13, 23, 24, 123, time.UTC),
+			"2021-09-10T13:23:24.000000123Z",
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.testN, func(t *testing.T) {
+			// --- Given ---
+			tspy := tester.New(t)
+			tspy.Close()
+
+			cpf := NewFake(tspy)
+
+			// --- When ---
+			cpf.Set("KEY", tc.val)
+
+			// --- Then ---
+			assert.Equal(t, tc.want, must.Value(cpf.CfgKey("KEY")))
+		})
+	}
 }
 
 func Test_Fake_SetFrom(t *testing.T) {
