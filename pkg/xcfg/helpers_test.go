@@ -188,6 +188,7 @@ func Test_doubleQuoteEscape_tabular(t *testing.T) {
 		{"exclamation", "!", "\\!"},
 		{"dollar", "$", "\\$"},
 		{"double quote", `"`, "\\\""},
+		{"backtick", "`", "\\`"},
 		{"text with new line", "abc\ndef", "abc\\ndef"},
 	}
 

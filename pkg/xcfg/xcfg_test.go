@@ -465,6 +465,18 @@ func Test_Unmarshal(t *testing.T) {
 		assert.Equal(t, Config{"A": "B", "C": "D"}, have)
 	})
 
+	t.Run("marshaled escapes", func(t *testing.T) {
+		// --- Given ---
+		cfg := Config{"K": "a\\b\r\n!$`\"' #c"}
+
+		// --- When ---
+		have, err := Unmarshal(cfg.Marshal())
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, cfg, have)
+	})
+
 	t.Run("error - invalid line", func(t *testing.T) {
 		// --- When ---
 		have, err := Unmarshal("INVALID LINE")
