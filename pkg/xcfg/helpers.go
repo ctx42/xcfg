@@ -22,7 +22,7 @@ import (
 // TODO(rz): Prefixes and key names should always go after maps, providers.
 //   Now we have one convention in this file and other in adapters.
 
-// Open helper function for reading a file to buffer and returning a reader.
+// Open reads the whole file at pth and returns a reader over its content.
 func Open(pth string) (*bytes.Reader, error) {
 	buf, err := os.ReadFile(pth)
 	if err != nil {
@@ -31,8 +31,8 @@ func Open(pth string) (*bytes.Reader, error) {
 	return bytes.NewReader(buf), nil
 }
 
-// GetOr returns the value of the specified key from the given provider. If the
-// key is not found in the provider, it returns the provided default value.
+// GetOr returns the value of the specified key from the given provider. When
+// the provider returns any error for the key, it returns the default value.
 func GetOr(key string, cpv Provider, def string) string {
 	if val, err := cpv.CfgKey(key); err == nil {
 		return val

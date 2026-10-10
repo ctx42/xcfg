@@ -49,8 +49,8 @@ var (
 // [NewFromPath] as Base64 encoded (unpadded URL-safe alphabet).
 const prefix64 = "base64:"
 
-// ErrCfgFileNotFound is error returned when configuration file was not found
-// at given path, or it was not a file or not readable.
+// ErrCfgFileNotFound is the error returned when the configuration file at the
+// given path does not exist, is not a regular file, or is not readable.
 var ErrCfgFileNotFound = NewError("config file not found", ECCfgFileNotFound)
 
 // Provider provides configuration values.
@@ -80,9 +80,9 @@ type options struct {
 	env []string
 }
 
-// WithEnv is option for [NewFromPath] setting environment to overwrite keys.
-// The keys in the config matching keys present in the environment will be
-// overwritten.
+// WithEnv is an option for [NewFromPath] that sets the environment used to
+// overwrite keys. Configuration keys present in the environment take their
+// values from it; other environment variables are ignored.
 func WithEnv(env []string) Option {
 	return func(opts *options) { opts.env = env }
 }
@@ -90,8 +90,10 @@ func WithEnv(env []string) Option {
 // Config holds application configuration.
 type Config map[string]string
 
-// New creates new instance of Config and loads configuration from reader.
-// The reader may hold a Base64 encoded configuration (see [Config.Encode]).
+// New creates a new [Config] and loads the configuration from the reader.
+// Input starting with the `base64:` prefix is always decoded as a Base64
+// encoded configuration (see [Config.Encode]), so the prefix is reserved and
+// cannot start a plain dotenv file.
 func New(r io.Reader) (Config, error) {
 	var err error
 	cfg := make(map[string]string)

@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2026 Rafal Zajac
 // SPDX-License-Identifier: MIT
 
+// Package xcfgtest provides test helpers for package xcfg: the [Fake]
+// configuration provider and helpers that load a configuration or fail the
+// test.
 package xcfgtest
 
 import (
@@ -18,7 +21,7 @@ import (
 	"github.com/ctx42/xcfg/pkg/xcfg"
 )
 
-// Fake is fake configuration provider. Create it with [NewFake] or
+// Fake is a fake configuration provider. Create it with [NewFake] or
 // [FakeLoad]; the zero value is not usable.
 type Fake struct {
 	mx  sync.RWMutex      // Guards map.
@@ -28,7 +31,7 @@ type Fake struct {
 
 var _ xcfg.Provider = &Fake{} // Compile time check.
 
-// NewFake returns new instance of Fake.
+// NewFake returns a new, empty [Fake].
 func NewFake(t tester.T) *Fake {
 	return &Fake{
 		cfg: make(map[string]string),
@@ -36,7 +39,8 @@ func NewFake(t tester.T) *Fake {
 	}
 }
 
-// FakeLoad returns fake based on configuration file.
+// FakeLoad returns a [Fake] holding the configuration loaded from pth.
+// Calls t.Error() and returns nil on error.
 func FakeLoad(t tester.T, pth string) *Fake {
 	t.Helper()
 
@@ -58,6 +62,8 @@ func FakeLoad(t tester.T, pth string) *Fake {
 	return cpf
 }
 
+// Reader returns a reader over the configuration in the dotenv format, as
+// [xcfg.Config.Marshal] writes it.
 func (cpf *Fake) Reader() io.Reader {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
@@ -70,7 +76,7 @@ func (cpf *Fake) Reader() io.Reader {
 	return strings.NewReader(xcfg.Config(vss).Marshal())
 }
 
-// Set sets key with value. Implements fluent interface.
+// Set sets the key to the string form of the value and returns the [Fake].
 func (cpf *Fake) Set(key string, val any) *Fake {
 	cpf.mx.Lock()
 	defer cpf.mx.Unlock()
@@ -91,8 +97,8 @@ func (cpf *Fake) SetFrom(m map[string]string) *Fake {
 	return cpf
 }
 
-// SetFromWithPrefix sets configuration from the map. If prefix is provided all
-// keys will be prefixed with it and underscore.
+// SetFromWithPrefix sets configuration from the map. A non-empty prefix is
+// added to every key with an underscore separator.
 func (cpf *Fake) SetFromWithPrefix(prefix string, m map[string]string) *Fake {
 	cpf.mx.Lock()
 	defer cpf.mx.Unlock()
@@ -106,7 +112,7 @@ func (cpf *Fake) SetFromWithPrefix(prefix string, m map[string]string) *Fake {
 	return cpf
 }
 
-// MustKey returns configuration key value. Calls t.Error() if it's not set.
+// MustKey returns the value of the key. Calls t.Error() if it is not set.
 func (cpf *Fake) MustKey(key string) string {
 	cpf.t.Helper()
 	val, err := cpf.CfgKey(key)
@@ -116,7 +122,7 @@ func (cpf *Fake) MustKey(key string) string {
 	return val
 }
 
-// DeleteKey removes keys from internal map.
+// DeleteKey removes the key.
 func (cpf *Fake) DeleteKey(key string) {
 	cpf.mx.Lock()
 	defer cpf.mx.Unlock()
@@ -136,7 +142,7 @@ func (cpf *Fake) CfgKey(key string) (string, error) {
 	return "", xcfg.NewFieldError(key, xcfg.ErrKeyMissing)
 }
 
-// Map returns copy of the configuration map.
+// Map returns a copy of the configuration map.
 func (cpf *Fake) Map() map[string]string {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
@@ -157,9 +163,8 @@ func (cpf *Fake) Reset() {
 	}
 }
 
-// Save saves the config to the filesystem. If dir is empty string it will
-// create temporary directory and put the file with name there. The temporary
-// directory will be automatically removed once the test finishes.
+// Save writes the configuration to the file name in dir and returns its path.
+// An empty dir means a temporary directory, removed when the test finishes.
 func (cpf *Fake) Save(dir, name string) string {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
@@ -201,7 +206,7 @@ func (cpf *Fake) SetEnv() {
 	}
 }
 
-// anyToStr returns string representation of interface value.
+// anyToStr returns the string representation of a configuration value.
 func anyToStr(t tester.T, val any) string {
 	t.Helper()
 
