@@ -119,7 +119,8 @@ func NewFromPath(pth string, opts ...func(*options)) (Config, error) {
 	} else {
 		var r io.Reader
 		if r, err = Open(pth); err != nil {
-			return nil, ErrCfgFileNotFound
+			err = fmt.Errorf("%w: %w", ErrCfgFileNotFound, err)
+			return nil, NewError("", ECCfgFileNotFound, xrr.WithCause(err))
 		}
 		if cfg, err = New(r); err != nil {
 			return nil, err

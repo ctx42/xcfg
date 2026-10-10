@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/ctx42/testing/pkg/assert"
@@ -242,6 +243,19 @@ func Test_NewFromPath(t *testing.T) {
 
 		// --- Then ---
 		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.Nil(t, cfg)
+	})
+
+	t.Run("error - path is a directory", func(t *testing.T) {
+		// --- When ---
+		cfg, err := NewFromPath("testdata")
+
+		// --- Then ---
+		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.ErrorIs(t, syscall.EISDIR, err)
+		xrrtest.AssertCode(t, ECCfgFileNotFound, err)
+		wMsg := "config file not found; read testdata: is a directory"
+		assert.ErrorEqual(t, wMsg, err)
 		assert.Nil(t, cfg)
 	})
 
