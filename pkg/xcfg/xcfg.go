@@ -155,6 +155,8 @@ func (cfg Config) CfgKey(key string) (string, error) {
 
 // Marshal outputs the given configuration map as a dotenv-formatted file.
 // Each line is in the format: KEY="VALUE" where VALUE is backslash-escaped.
+// Keys are written verbatim, so [New] reads back only keys valid in dotenv:
+// non-empty, without "=", ":", or whitespace, and not starting with "#".
 func (cfg Config) Marshal() string {
 	lns := make([]string, 0, len(cfg))
 	for k, v := range cfg {
@@ -170,7 +172,7 @@ func (cfg Config) Marshal() string {
 }
 
 // Encode encodes the config as an unpadded URL-safe Base64 string with
-// the `base64:` prefix.
+// the `base64:` prefix. Keys follow the same rules as in [Config.Marshal].
 func (cfg Config) Encode() string {
 	data := cfg.Marshal()
 	return prefix64 + base64.RawURLEncoding.EncodeToString([]byte(data))
