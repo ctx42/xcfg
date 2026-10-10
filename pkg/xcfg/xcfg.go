@@ -163,8 +163,7 @@ func (cfg Config) Marshal() string {
 		if d, err := strconv.Atoi(v); err == nil && strconv.Itoa(d) == v {
 			lns = append(lns, k+"="+v)
 		} else {
-			//nolint:gocritic
-			lns = append(lns, fmt.Sprintf(`%s="%s"`, k, doubleQuoteEscape(v)))
+			lns = append(lns, k+`="`+doubleQuoteEscape(v)+`"`)
 		}
 	}
 	sort.Strings(lns)
