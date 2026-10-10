@@ -20,8 +20,8 @@ func GetOr(key string, cpv Provider, def string) string {
 	return def
 }
 
-// Prefix adds the prefix to the configuration key. If the prefix is non-empty
-// string, it will be added with "_" separator to the key.
+// Prefix adds the prefix to the configuration key. If the prefix is a
+// non-empty string, it is added to the key with the "_" separator.
 func Prefix(prefix, key string) string {
 	if prefix != "" {
 		if key == "" {
@@ -42,7 +42,7 @@ func StripPrefix(prefix, key string) string {
 	return key
 }
 
-// StripPrefixes strips prefix from all the map keys. When a stripped key
+// StripPrefixes strips the prefix from all the map keys. When a stripped key
 // collides with a key that never had the prefix, the value of the prefixed key
 // wins. It always returns a new map without editing the original one.
 func StripPrefixes(prefix string, cfg map[string]string) map[string]string {
@@ -63,8 +63,8 @@ func StripPrefixes(prefix string, cfg map[string]string) map[string]string {
 	return ret
 }
 
-// AddPrefixes adds prefix to all the keys in the cfg map. It always returns a
-// new map without editing the original one.
+// AddPrefixes adds the prefix to all the keys in the cfg map. It always
+// returns a new map without editing the original one.
 func AddPrefixes(prefix string, cfg map[string]string) map[string]string {
 	if prefix == "" || len(cfg) == 0 {
 		return maps.Clone(cfg)
