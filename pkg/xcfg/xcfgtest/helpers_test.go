@@ -11,21 +11,26 @@ import (
 	"github.com/ctx42/testing/pkg/tester"
 	"github.com/ctx42/testkit/pkg/iokit"
 	"github.com/ctx42/testkit/pkg/oskit"
+
+	"github.com/ctx42/xcfg/pkg/xcfg"
 )
 
 func Test_Open(t *testing.T) {
-	t.Run("ok", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 		// --- Given ---
 		pth := "../testdata/example0.conf"
 
+		tspy := tester.New(t)
+		tspy.Close()
+
 		// --- When ---
-		rdr := Open(t, pth)
+		have := Open(tspy, pth)
 
 		// --- Then ---
-		assert.Equal(t, oskit.ReadFileStr(t, pth), iokit.ReadAllStr(t, rdr))
+		assert.Equal(t, oskit.ReadFileStr(t, pth), iokit.ReadAllStr(t, have))
 	})
 
-	t.Run("fatal", func(t *testing.T) {
+	t.Run("error - not existing file", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
 		tspy.ExpectError()
@@ -41,17 +46,19 @@ func Test_Open(t *testing.T) {
 }
 
 func Test_NewFromPath(t *testing.T) {
-	t.Run("ok", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
+
 		// --- When ---
-		cfg := NewFromPath(t, "../testdata/example0.conf")
-		val, err := cfg.CfgKey("VALUE")
+		have := NewFromPath(tspy, "../testdata/example0.conf")
 
 		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, "0", val)
+		assert.Equal(t, "0", have["VALUE"])
 	})
 
-	t.Run("fatal", func(t *testing.T) {
+	t.Run("error - not existing file", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
 		tspy.ExpectError()
@@ -83,20 +90,21 @@ func Test_NewFromPath(t *testing.T) {
 }
 
 func Test_NewFromReader(t *testing.T) {
-	t.Run("ok", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 		// --- Given ---
 		rdr := strings.NewReader("KEY=VALUE")
 
+		tspy := tester.New(t)
+		tspy.Close()
+
 		// --- When ---
-		cfg := NewFromReader(t, rdr)
-		val, err := cfg.CfgKey("KEY")
+		have := NewFromReader(tspy, rdr)
 
 		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, "VALUE", val)
+		assert.Equal(t, xcfg.Config{"KEY": "VALUE"}, have)
 	})
 
-	t.Run("fatal", func(t *testing.T) {
+	t.Run("error - invalid config", func(t *testing.T) {
 		// --- Given ---
 		rdr := strings.NewReader("---")
 

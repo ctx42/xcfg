@@ -20,26 +20,37 @@ import (
 	"github.com/ctx42/xcfg/pkg/xcfg"
 )
 
+func Test_NewFake(t *testing.T) {
+	// --- Given ---
+	tspy := tester.New(t, 0)
+	tspy.Close()
+
+	// --- When ---
+	have := NewFake(tspy)
+
+	// --- Then ---
+	assert.Equal(t, map[string]string{}, have.Map())
+}
+
 func Test_FakeLoad(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
+
 		// --- When ---
-		cpf := FakeLoad(t, "../testdata/example0.conf")
+		have := FakeLoad(tspy, "../testdata/example0.conf")
 
 		// --- Then ---
-		val, err := cpf.CfgKey("VALUE")
-		assert.Equal(t, "0", val)
-		assert.NoError(t, err)
-
-		val, err = cpf.CfgKey("LOG_DIR")
-		assert.Equal(t, "tmp/log", val)
-		assert.NoError(t, err)
-
-		val, err = cpf.CfgKey("ABS_DIR")
-		assert.Equal(t, "/some/absolute/path/log", val)
-		assert.NoError(t, err)
+		want := map[string]string{
+			"ABS_DIR": "/some/absolute/path/log",
+			"LOG_DIR": "tmp/log",
+			"VALUE":   "0",
+		}
+		assert.Equal(t, want, have.Map())
 	})
 
-	t.Run("error", func(t *testing.T) {
+	t.Run("error - not existing file", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
 		tspy.ExpectError()
@@ -47,13 +58,13 @@ func Test_FakeLoad(t *testing.T) {
 		tspy.Close()
 
 		// --- When ---
-		cpf := FakeLoad(tspy, "not_existing_file")
+		have := FakeLoad(tspy, "not_existing_file")
 
 		// --- Then ---
-		assert.Nil(t, cpf)
+		assert.Nil(t, have)
 	})
 
-	t.Run("invalid config file", func(t *testing.T) {
+	t.Run("error - invalid config", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
 		tspy.ExpectError()
@@ -61,10 +72,10 @@ func Test_FakeLoad(t *testing.T) {
 		tspy.Close()
 
 		// --- When ---
-		cpf := FakeLoad(tspy, "testdata/invalid.conf")
+		have := FakeLoad(tspy, "testdata/invalid.conf")
 
 		// --- Then ---
-		assert.Nil(t, cpf)
+		assert.Nil(t, have)
 	})
 
 	t.Run("loads after an earlier failure", func(t *testing.T) {
@@ -85,17 +96,21 @@ func Test_FakeLoad(t *testing.T) {
 }
 
 func Test_Fake_Reader(t *testing.T) {
-	// --- When ---
-	cpf := FakeLoad(t, "../testdata/example0.conf")
+	// --- Given ---
+	tspy := tester.New(t)
+	tspy.Close()
+
+	cpf := FakeLoad(tspy, "../testdata/example0.conf")
 
 	// --- When ---
-	rdr := cpf.Reader()
+	have := cpf.Reader()
 
 	// --- Then ---
-	want := `ABS_DIR="/some/absolute/path/log"
-LOG_DIR="tmp/log"
-VALUE=0`
-	assert.Equal(t, want, iokit.ReadAllStr(t, rdr))
+	want := "" +
+		"ABS_DIR=\"/some/absolute/path/log\"\n" +
+		"LOG_DIR=\"tmp/log\"\n" +
+		"VALUE=0"
+	assert.Equal(t, want, iokit.ReadAllStr(t, have))
 }
 
 func Test_Fake_Set(t *testing.T) {
@@ -106,14 +121,14 @@ func Test_Fake_Set(t *testing.T) {
 			val  any
 			want string
 		}{
-			{"1", "abc", "abc"},
-			{"2", 1, "1"},
-			{"3", float32(1.23), "1.23"},
-			{"4", 1.23, "1.23"},
-			{"5", time.Second, "1s"},
-			{"6", time.UTC, "UTC"},
+			{"string", "abc", "abc"},
+			{"int", 1, "1"},
+			{"float32", float32(1.23), "1.23"},
+			{"float64", 1.23, "1.23"},
+			{"duration", time.Second, "1s"},
+			{"location", time.UTC, "UTC"},
 			{
-				"7",
+				"time",
 				time.Date(2021, 9, 10, 13, 23, 24, 123, time.UTC),
 				"2021-09-10T13:23:24.000000123Z",
 			},
@@ -138,12 +153,11 @@ func Test_Fake_Set(t *testing.T) {
 		}
 	})
 
-	t.Run("fatal", func(t *testing.T) {
+	t.Run("error - unsupported type", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
 		tspy.ExpectError()
-		wMsg := "unsupported config type %#v"
-		tspy.ExpectLogEqual(wMsg, uint(10))
+		tspy.ExpectLogEqual("unsupported config type %#v", uint(10))
 		tspy.Close()
 
 		// --- When ---
@@ -228,9 +242,44 @@ func Test_Fake_SetFromWithPrefix(t *testing.T) {
 	})
 }
 
+func Test_Fake_MustKey(t *testing.T) {
+	t.Run("existing key", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
+
+		cpf := FakeLoad(tspy, "../testdata/example0.conf")
+
+		// --- When ---
+		have := cpf.MustKey("VALUE")
+
+		// --- Then ---
+		assert.Equal(t, "0", have)
+	})
+
+	t.Run("error - missing key", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.ExpectError()
+		tspy.ExpectLogEqual("NOT_EXISTING: config key missing")
+		tspy.Close()
+
+		cpf := FakeLoad(tspy, "../testdata/example0.conf")
+
+		// --- When ---
+		have := cpf.MustKey("NOT_EXISTING")
+
+		// --- Then ---
+		assert.Equal(t, "", have)
+	})
+}
+
 func Test_Fake_DeleteKey(t *testing.T) {
 	// --- Given ---
-	cpf := FakeLoad(t, "../testdata/example0.conf")
+	tspy := tester.New(t)
+	tspy.Close()
+
+	cpf := FakeLoad(tspy, "../testdata/example0.conf")
 
 	// --- When ---
 	cpf.DeleteKey("LOG_DIR")
@@ -239,6 +288,38 @@ func Test_Fake_DeleteKey(t *testing.T) {
 	val, err := cpf.CfgKey("LOG_DIR")
 	xrrtest.AssertFieldIs(t, "LOG_DIR", xcfg.ErrKeyMissing, err)
 	assert.Equal(t, "", val)
+}
+
+func Test_Fake_CfgKey(t *testing.T) {
+	t.Run("existing key", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
+
+		cpf := NewFake(tspy).Set("KEY", "VAL")
+
+		// --- When ---
+		have, err := cpf.CfgKey("KEY")
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, "VAL", have)
+	})
+
+	t.Run("error - missing key", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
+
+		cpf := NewFake(tspy)
+
+		// --- When ---
+		have, err := cpf.CfgKey("KEY")
+
+		// --- Then ---
+		xrrtest.AssertFieldIs(t, "KEY", xcfg.ErrKeyMissing, err)
+		assert.Equal(t, "", have)
+	})
 }
 
 func Test_Fake_Map(t *testing.T) {
@@ -280,7 +361,10 @@ func Test_Fake_Map(t *testing.T) {
 
 func Test_Fake_Reset(t *testing.T) {
 	// --- Given ---
-	cpf := FakeLoad(t, "../testdata/example0.conf")
+	tspy := tester.New(t)
+	tspy.Close()
+
+	cpf := FakeLoad(tspy, "../testdata/example0.conf")
 
 	// --- When ---
 	cpf.Reset()
@@ -297,28 +381,6 @@ func Test_Fake_Reset(t *testing.T) {
 	val, err = cpf.CfgKey("VALUE")
 	xrrtest.AssertFieldIs(t, "VALUE", xcfg.ErrKeyMissing, err)
 	assert.Equal(t, "", val)
-}
-
-func Test_Fake_MustKey(t *testing.T) {
-	// --- When ---
-	cpf := FakeLoad(t, "../testdata/example0.conf").MustKey("VALUE")
-
-	// --- Then ---
-	assert.Equal(t, "0", cpf)
-}
-
-func Test_Fake_MustKey_fatal(t *testing.T) {
-	// --- Given ---
-	tspy := tester.New(t)
-	tspy.ExpectError()
-	tspy.ExpectLogEqual("NOT_EXISTING: config key missing")
-	tspy.Close()
-
-	// --- When ---
-	cpf := FakeLoad(tspy, "../testdata/example0.conf").MustKey("NOT_EXISTING")
-
-	// --- Then ---
-	assert.Equal(t, "", cpf)
 }
 
 func Test_Fake_Save(t *testing.T) {
@@ -359,12 +421,13 @@ func Test_Fake_Save(t *testing.T) {
 		// --- Then ---
 		assert.Equal(t, filepath.Join(dir, "my.conf"), pth)
 
-		want := `LOG_DIR="/var/log"
-VALUE="value"`
+		want := "" +
+			"LOG_DIR=\"/var/log\"\n" +
+			"VALUE=\"value\""
 		assert.Equal(t, want, oskit.ReadFileStr(t, pth))
 	})
 
-	t.Run("path is a directory error", func(t *testing.T) {
+	t.Run("error - path is a directory", func(t *testing.T) {
 		// --- Given ---
 		dir := t.TempDir()
 		cfgPth := oskit.MkdirAll(t, dir, "dir")
@@ -485,7 +548,7 @@ func Test_anyToStr_tabular(t *testing.T) {
 }
 
 func Test_anyToStr(t *testing.T) {
-	t.Run("not supported type", func(t *testing.T) {
+	t.Run("error - unsupported type", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
 		tspy.ExpectError()

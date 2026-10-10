@@ -10,4 +10,4 @@ import (
 // TStringer is type implementing [fmt.Stringer] interface.
 type TStringer int
 
-func (v TStringer) String() string { return strconv.Itoa(int(v)) }
+func (tsr TStringer) String() string { return strconv.Itoa(int(tsr)) }
