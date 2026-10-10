@@ -178,11 +178,12 @@ func Test_Fake_SetFrom(t *testing.T) {
 	cpf := NewFake(tspy)
 	cpf.Set("KEY0", "VAL0")
 
-	// --- When ---
 	m := map[string]string{
 		"KEY0": "VAL99",
 		"KEY1": "VAL1",
 	}
+
+	// --- When ---
 	cpf.SetFrom(m)
 
 	// --- Then ---
@@ -200,11 +201,12 @@ func Test_Fake_SetFromWithPrefix(t *testing.T) {
 		cpf := NewFake(tspy)
 		cpf.Set("KEY0", "VAL0")
 
-		// --- When ---
 		m := map[string]string{
 			"KEY0": "VAL99",
 			"KEY1": "VAL1",
 		}
+
+		// --- When ---
 		cpf.SetFromWithPrefix("", m)
 
 		// --- Then ---
@@ -221,11 +223,12 @@ func Test_Fake_SetFromWithPrefix(t *testing.T) {
 		cpf := NewFake(tspy)
 		cpf.Set("KEY0", "VAL0")
 
-		// --- When ---
 		m := map[string]string{
 			"KEY0": "VAL99",
 			"KEY1": "VAL1",
 		}
+
+		// --- When ---
 		cpf.SetFromWithPrefix("PREF", m)
 
 		// --- Then ---
