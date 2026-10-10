@@ -90,7 +90,6 @@ func Test_NewFromPath(t *testing.T) {
 		tspy.ExpectError()
 		tspy.ExpectLogEqual("earlier failure")
 		tspy.Close()
-
 		tspy.Error("earlier failure")
 
 		// --- When ---

@@ -84,7 +84,6 @@ func Test_FakeLoad(t *testing.T) {
 		tspy.ExpectError()
 		tspy.ExpectLogEqual("earlier failure")
 		tspy.Close()
-
 		tspy.Error("earlier failure")
 
 		// --- When ---
@@ -410,6 +409,7 @@ func Test_Fake_Save(t *testing.T) {
 		// --- Then ---
 		want := "LOG_DIR=\"/var/log\"\nVALUE=\"value\""
 		assert.Equal(t, want, oskit.ReadFileStr(t, pth))
+
 		tspy.Finish()
 		assert.Equal(t, filepath.Join(tspy.GetTempDir(0), "my.conf"), pth)
 	})
@@ -430,7 +430,6 @@ func Test_Fake_Save(t *testing.T) {
 
 		// --- Then ---
 		assert.Equal(t, filepath.Join(dir, "my.conf"), pth)
-
 		want := "" +
 			"LOG_DIR=\"/var/log\"\n" +
 			"VALUE=\"value\""

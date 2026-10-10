@@ -54,7 +54,6 @@ func Test_Merge(t *testing.T) {
 			"KEY1": "VAL1",
 			"KEY2": "VAL2",
 		}
-
 		src1 := map[string]string{
 			"KEY4": "VAL4",
 			"KEY5": "VAL5",
@@ -84,7 +83,6 @@ func Test_Merge(t *testing.T) {
 			"KEY1": "VAL1",
 			"KEY2": "VAL2",
 		}
-
 		src1 := map[string]string{
 			"KEY4": "VAL4",
 			"KEY5": "VAL5",
