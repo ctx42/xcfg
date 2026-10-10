@@ -58,9 +58,9 @@ func Test_ParseTime_tabular(t *testing.T) {
 			have, err := ParseTime(tc.key, tc.tim)
 
 			// --- Then ---
-			assert.SameType(t, &FieldErrors{}, err)
+			_, _ = assert.SameType(t, &FieldErrors{}, err)
 			xrrtest.AssertEqual(t, tc.wantMsg, err)
-			xrrtest.AssertHasField(t, tc.key, err)
+			_, _ = xrrtest.AssertHasField(t, tc.key, err)
 			assert.Zero(t, have)
 		})
 	}
@@ -110,9 +110,9 @@ func Test_ParseDur_tabular(t *testing.T) {
 			have, err := ParseDur(tc.key, tc.dur)
 
 			// --- Then ---
-			assert.SameType(t, &FieldErrors{}, err)
+			_, _ = assert.SameType(t, &FieldErrors{}, err)
 			xrrtest.AssertEqual(t, tc.wantMsg, err)
-			xrrtest.AssertHasField(t, tc.key, err)
+			_, _ = xrrtest.AssertHasField(t, tc.key, err)
 			assert.Zero(t, have)
 		})
 	}
@@ -178,9 +178,9 @@ func Test_ParseInteger_tabular(t *testing.T) {
 			have, err := ParseInteger(tc.key, tc.val)
 
 			// --- Then ---
-			assert.SameType(t, &FieldErrors{}, err)
+			_, _ = assert.SameType(t, &FieldErrors{}, err)
 			xrrtest.AssertEqual(t, tc.wantMsg, err)
-			xrrtest.AssertHasField(t, tc.key, err)
+			_, _ = xrrtest.AssertHasField(t, tc.key, err)
 			assert.Zero(t, have)
 		})
 	}
@@ -235,9 +235,9 @@ func Test_ParseTimezone_tabular(t *testing.T) {
 			have, err := ParseTimezone(tc.key, tc.tim)
 
 			// --- Then ---
-			assert.SameType(t, &FieldErrors{}, err)
+			_, _ = assert.SameType(t, &FieldErrors{}, err)
 			xrrtest.AssertEqual(t, tc.wantMsg, err)
-			xrrtest.AssertHasField(t, tc.key, err)
+			_, _ = xrrtest.AssertHasField(t, tc.key, err)
 			assert.Nil(t, have)
 		})
 	}
@@ -249,10 +249,10 @@ func Test_ParseBool(t *testing.T) {
 		have, err := ParseBool("KEY_NAME", "")
 
 		// --- Then ---
-		assert.SameType(t, &FieldErrors{}, err)
+		_, _ = assert.SameType(t, &FieldErrors{}, err)
 		wMsg := "KEY_NAME: config key not set (ECCfgKeyEmpty)"
 		xrrtest.AssertEqual(t, wMsg, err)
-		xrrtest.AssertHasField(t, "KEY_NAME", err)
+		_, _ = xrrtest.AssertHasField(t, "KEY_NAME", err)
 		assert.False(t, have)
 	})
 
@@ -261,13 +261,13 @@ func Test_ParseBool(t *testing.T) {
 		have, err := ParseBool("KEY_NAME", "abc")
 
 		// --- Then ---
-		assert.SameType(t, &FieldErrors{}, err)
+		_, _ = assert.SameType(t, &FieldErrors{}, err)
 		wMsg := "" +
 			"KEY_NAME: invalid config key boolean format: " +
 			"strconv.ParseBool: parsing \"abc\": invalid syntax " +
 			"(ECCfgKeyInvFormat)"
 		xrrtest.AssertEqual(t, wMsg, err)
-		xrrtest.AssertHasField(t, "KEY_NAME", err)
+		_, _ = xrrtest.AssertHasField(t, "KEY_NAME", err)
 		assert.False(t, have)
 	})
 }

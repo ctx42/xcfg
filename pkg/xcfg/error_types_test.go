@@ -143,7 +143,7 @@ func Test_NewFieldError(t *testing.T) {
 
 		// --- Then ---
 		assert.ErrorEqual(t, "field0: msg", err)
-		xrrtest.AssertHasField(t, "field0", err)
+		_, _ = xrrtest.AssertHasField(t, "field0", err)
 	})
 
 	t.Run("marshals to JSON", func(t *testing.T) {
@@ -173,8 +173,8 @@ func Test_NewFieldErrors(t *testing.T) {
 
 		// --- Then ---
 		assert.ErrorEqual(t, "field0: msg0; field1: msg1", err)
-		xrrtest.AssertHasField(t, "field0", err)
-		xrrtest.AssertHasField(t, "field1", err)
+		_, _ = xrrtest.AssertHasField(t, "field0", err)
+		_, _ = xrrtest.AssertHasField(t, "field1", err)
 	})
 
 	t.Run("map not copied", func(t *testing.T) {
@@ -186,7 +186,7 @@ func Test_NewFieldErrors(t *testing.T) {
 		fields["field1"] = errors.New("msg1")
 
 		// --- Then ---
-		xrrtest.AssertHasField(t, "field1", err)
+		_, _ = xrrtest.AssertHasField(t, "field1", err)
 	})
 
 	t.Run("marshals to JSON", func(t *testing.T) {

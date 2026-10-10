@@ -18,7 +18,7 @@ import (
 
 // Open reads the whole file at pth and returns a reader over its content.
 func Open(pth string) (*bytes.Reader, error) {
-	buf, err := os.ReadFile(pth)
+	buf, err := os.ReadFile(pth) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}
