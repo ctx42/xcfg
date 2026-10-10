@@ -247,6 +247,20 @@ func Test_Fake_SetFromWithPrefix(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "VAL1", val)
 	})
+
+	t.Run("empty key with prefix", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t, 0)
+		tspy.Close()
+
+		cpf := NewFake(tspy)
+
+		// --- When ---
+		cpf.SetFromWithPrefix("PREF", map[string]string{"": "VAL"})
+
+		// --- Then ---
+		assert.Equal(t, map[string]string{"PREF": "VAL"}, cpf.Map())
+	})
 }
 
 func Test_Fake_MustKey(t *testing.T) {

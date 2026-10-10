@@ -32,8 +32,9 @@ func Prefix(prefix, key string) string {
 	return key
 }
 
-// StripPrefix strips the prefix from the key. It is the reverse to what
-// [Prefix] does.
+// StripPrefix strips the prefix and the "_" separator from the key. It
+// reverses [Prefix] for every non-empty key; a key equal to the prefix is
+// returned unchanged, although [Prefix] makes it from an empty key.
 func StripPrefix(prefix, key string) string {
 	if prefix != "" {
 		key = strings.TrimPrefix(key, prefix+"_")

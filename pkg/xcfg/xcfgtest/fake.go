@@ -84,17 +84,14 @@ func (cpf *Fake) SetFrom(m map[string]string) *Fake {
 	return cpf
 }
 
-// SetFromWithPrefix sets configuration from the map. A non-empty prefix is
-// added to every key with an underscore separator.
+// SetFromWithPrefix sets configuration from the map with every key prefixed
+// the way [xcfg.Prefix] does it.
 func (cpf *Fake) SetFromWithPrefix(prefix string, m map[string]string) *Fake {
 	cpf.mx.Lock()
 	defer cpf.mx.Unlock()
 
 	for key, val := range m {
-		if prefix != "" {
-			key = prefix + "_" + key
-		}
-		cpf.cfg[key] = val
+		cpf.cfg[xcfg.Prefix(prefix, key)] = val
 	}
 	return cpf
 }
