@@ -18,22 +18,11 @@ import (
 
 // Error codes.
 const (
-	// ECCfgError represents general config error code.
-	ECCfgError = "ECCfgError"
-
-	// ECCfgKeyInvFormat represents error code for invalid config key format.
+	ECCfgError        = "ECCfgError"
 	ECCfgKeyInvFormat = "ECCfgKeyInvFormat"
-
-	// ECCfgKeyInvValue represents error code for invalid config key value.
-	ECCfgKeyInvValue = "ECCfgKeyInvValue"
-
-	// ECCfgKeyEmpty represents error code for empty config key.
-	ECCfgKeyEmpty = "ECCfgKeyEmpty"
-
-	// ECCfgKeyMissing represents error code for missing config key.
-	ECCfgKeyMissing = "ECCfgKeyMissing"
-
-	// ECCfgFileNotFound represents error code for config file not found.
+	ECCfgKeyInvValue  = "ECCfgKeyInvValue"
+	ECCfgKeyEmpty     = "ECCfgKeyEmpty"
+	ECCfgKeyMissing   = "ECCfgKeyMissing"
 	ECCfgFileNotFound = "ECCfgFileNotFound"
 )
 
