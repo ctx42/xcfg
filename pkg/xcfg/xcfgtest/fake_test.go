@@ -160,8 +160,15 @@ func Test_Fake_Set(t *testing.T) {
 		tspy.ExpectLogEqual("unsupported config type %#v", uint(10))
 		tspy.Close()
 
+		cpf := NewFake(tspy)
+
 		// --- When ---
-		_, _ = NewFake(tspy).Set("KEY", uint(10)).CfgKey("KEY")
+		cpf.Set("KEY", uint(10))
+
+		// --- Then ---
+		val, err := cpf.CfgKey("KEY")
+		xrrtest.AssertFieldIs(t, "KEY", xcfg.ErrKeyMissing, err)
+		assert.Equal(t, "", val)
 	})
 }
 
@@ -539,9 +546,10 @@ func Test_anyToStr_tabular(t *testing.T) {
 			tspy.Close()
 
 			// --- When ---
-			have := anyToStr(tspy, tc.in)
+			have, ok := anyToStr(tspy, tc.in)
 
 			// --- Then ---
+			assert.True(t, ok)
 			assert.Equal(t, tc.want, have)
 		})
 	}
@@ -558,9 +566,10 @@ func Test_anyToStr(t *testing.T) {
 		type Abc struct{}
 
 		// --- When ---
-		have := anyToStr(tspy, Abc{})
+		have, ok := anyToStr(tspy, Abc{})
 
 		// --- Then ---
+		assert.False(t, ok)
 		assert.Empty(t, have)
 	})
 }

@@ -61,12 +61,15 @@ func (cpf *Fake) Reader() io.Reader {
 }
 
 // Set sets the key to the string form of the value and returns the [Fake].
+// A value of an unsupported type fails the test and leaves the key unset.
 func (cpf *Fake) Set(key string, val any) *Fake {
 	cpf.mx.Lock()
 	defer cpf.mx.Unlock()
 	cpf.t.Helper()
 
-	cpf.cfg[key] = anyToStr(cpf.t, val)
+	if vs, ok := anyToStr(cpf.t, val); ok {
+		cpf.cfg[key] = vs
+	}
 	return cpf
 }
 
@@ -190,8 +193,9 @@ func (cpf *Fake) SetEnv() {
 	}
 }
 
-// anyToStr returns the string representation of a configuration value.
-func anyToStr(t tester.T, val any) string {
+// anyToStr returns the string representation of a configuration value. For
+// an unsupported type it calls t.Errorf() and returns false.
+func anyToStr(t tester.T, val any) (string, bool) {
 	t.Helper()
 
 	var vs string
@@ -216,7 +220,8 @@ func anyToStr(t tester.T, val any) string {
 		vs = strconv.FormatBool(v)
 	default:
 		t.Errorf("unsupported config type %#v", val)
+		return "", false
 	}
 
-	return vs
+	return vs, true
 }
