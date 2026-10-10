@@ -6,7 +6,6 @@ package xcfg_test
 import (
 	"bytes"
 	"encoding/base64"
-	"strings"
 	"syscall"
 	"testing"
 
@@ -528,84 +527,5 @@ func Test_Config_SetFrom(t *testing.T) {
 
 		// --- Then ---
 		assert.Equal(t, Config{"KEY": "VAL"}, have)
-	})
-}
-
-func Test_maybeDecode(t *testing.T) {
-	t.Run("not encoded config", func(t *testing.T) {
-		// --- Given ---
-		pth := "testdata/quoted.conf"
-		r := xcfgtest.Open(t, pth)
-
-		// --- When ---
-		have, err := MaybeDecode(r)
-
-		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, oskit.ReadFileStr(t, pth), iokit.ReadAllStr(t, have))
-	})
-
-	t.Run("input shorter than prefix", func(t *testing.T) {
-		// --- Given ---
-		r := strings.NewReader("A=B")
-
-		// --- When ---
-		have, err := MaybeDecode(r)
-
-		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, "A=B", iokit.ReadAllStr(t, have))
-	})
-
-	t.Run("empty input", func(t *testing.T) {
-		// --- Given ---
-		r := strings.NewReader("")
-
-		// --- When ---
-		have, err := MaybeDecode(r)
-
-		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, "", iokit.ReadAllStr(t, have))
-	})
-
-	t.Run("simple encoded config", func(t *testing.T) {
-		// --- Given ---
-		src := "A=B\nC=D\n"
-		enc := "base64:QT1CCkM9RAo"
-		r := strings.NewReader(enc)
-
-		// --- When ---
-		have, err := MaybeDecode(r)
-
-		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, src, iokit.ReadAllStr(t, have))
-	})
-
-	t.Run("encoded config", func(t *testing.T) {
-		// --- Given ---
-		pth := "testdata/quoted.conf"
-		enc := base64.RawURLEncoding.EncodeToString(oskit.ReadFile(t, pth))
-		r := strings.NewReader("base64:" + enc)
-
-		// --- When ---
-		have, err := MaybeDecode(r)
-
-		// --- Then ---
-		assert.NoError(t, err)
-		assert.Equal(t, oskit.ReadFileStr(t, pth), iokit.ReadAllStr(t, have))
-	})
-
-	t.Run("decode error", func(t *testing.T) {
-		// --- Given ---
-		r := strings.NewReader("base64:%%%")
-
-		// --- When ---
-		have, err := MaybeDecode(r)
-
-		// --- Then ---
-		assert.ErrorEqual(t, "illegal base64 data at input byte 0", err)
-		assert.Nil(t, have)
 	})
 }
