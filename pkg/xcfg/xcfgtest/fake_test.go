@@ -523,12 +523,12 @@ func Test_anyToStr_tabular(t *testing.T) {
 		{"float64", float64(123), "123"},
 		{"string", "abc", "abc"},
 		{
-			"time.Time",
+			"time",
 			time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC),
 			"2000-01-02T03:04:05Z",
 		},
-		{"time.Location", time.UTC, "UTC"},
-		{"fmt.Stringer", TStringer(123), "123"},
+		{"location", time.UTC, "UTC"},
+		{"stringer", TStringer(123), "123"},
 		{"bool", true, "true"},
 	}
 
