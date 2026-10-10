@@ -92,8 +92,7 @@ func ChangePrefix(from, to string, cfg map[string]string) map[string]string {
 	}
 	ret := make(map[string]string, len(cfg))
 	for key, val := range cfg {
-		if strings.HasPrefix(key, from) {
-			stripped := StripPrefix(from, key)
+		if stripped := StripPrefix(from, key); stripped != key {
 			ret[Prefix(to, stripped)] = val
 		} else {
 			ret[key] = val

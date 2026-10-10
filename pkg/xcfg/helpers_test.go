@@ -237,6 +237,18 @@ func Test_ChangePrefix(t *testing.T) {
 		assert.NotSame(t, data, have)
 	})
 
+	t.Run("key starting with from without separator", func(t *testing.T) {
+		// --- Given ---
+		data := map[string]string{"MYSQL_HOST": "VAL_1", "MY": "VAL_2"}
+
+		// --- When ---
+		have := ChangePrefix("MY", "YOUR", data)
+
+		// --- Then ---
+		want := map[string]string{"MYSQL_HOST": "VAL_1", "MY": "VAL_2"}
+		assert.Equal(t, want, have)
+	})
+
 	t.Run("empty from", func(t *testing.T) {
 		// --- Given ---
 		data := map[string]string{
