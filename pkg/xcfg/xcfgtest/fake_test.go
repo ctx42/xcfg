@@ -519,6 +519,25 @@ func Test_Fake_SetEnv(t *testing.T) {
 	})
 }
 
+func Test_anyToStr(t *testing.T) {
+	t.Run("error - unsupported type", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.ExpectError()
+		tspy.ExpectLogEqual("unsupported config type xcfgtest.Abc{}")
+		tspy.Close()
+
+		type Abc struct{}
+
+		// --- When ---
+		have, ok := anyToStr(tspy, Abc{})
+
+		// --- Then ---
+		assert.False(t, ok)
+		assert.Empty(t, have)
+	})
+}
+
 func Test_anyToStr_tabular(t *testing.T) {
 
 	tt := []struct {
@@ -555,23 +574,4 @@ func Test_anyToStr_tabular(t *testing.T) {
 			assert.Equal(t, tc.want, have)
 		})
 	}
-}
-
-func Test_anyToStr(t *testing.T) {
-	t.Run("error - unsupported type", func(t *testing.T) {
-		// --- Given ---
-		tspy := tester.New(t)
-		tspy.ExpectError()
-		tspy.ExpectLogEqual("unsupported config type xcfgtest.Abc{}")
-		tspy.Close()
-
-		type Abc struct{}
-
-		// --- When ---
-		have, ok := anyToStr(tspy, Abc{})
-
-		// --- Then ---
-		assert.False(t, ok)
-		assert.Empty(t, have)
-	})
 }
