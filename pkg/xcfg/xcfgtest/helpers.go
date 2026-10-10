@@ -22,16 +22,12 @@ func Open(t tester.T, pth string) *bytes.Reader {
 	return r
 }
 
-// NewFromPath returns the configuration loaded from the file at pth.
-// Calls t.Error() and returns nil on error.
+// NewFromPath returns the configuration loaded the way [xcfg.NewFromPath]
+// loads it, so pth may also be a `base64:` encoded configuration. Calls
+// t.Error() and returns nil on error.
 func NewFromPath(t tester.T, pth string) xcfg.Config {
 	t.Helper()
-	rdr := Open(t, pth)
-	if rdr == nil {
-		return nil
-	}
-
-	cfg, err := xcfg.New(rdr)
+	cfg, err := xcfg.NewFromPath(pth)
 	if err != nil {
 		t.Error(err)
 		return nil

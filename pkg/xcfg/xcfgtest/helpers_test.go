@@ -58,6 +58,18 @@ func Test_NewFromPath(t *testing.T) {
 		assert.Equal(t, "0", have["VALUE"])
 	})
 
+	t.Run("encoded argument", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
+
+		// --- When ---
+		have := NewFromPath(tspy, xcfg.Config{"KEY": "VAL"}.Encode())
+
+		// --- Then ---
+		assert.Equal(t, xcfg.Config{"KEY": "VAL"}, have)
+	})
+
 	t.Run("error - not existing file", func(t *testing.T) {
 		// --- Given ---
 		tspy := tester.New(t)
