@@ -34,14 +34,17 @@ golangci-lint run                             # lint (config is CI-provided)
   configuration itself, then applies `WithEnv` overrides to keys already
   present. Also holds the error codes and sentinel errors.
 - **`key_adapter.go`** — `Adaptor` wraps a `Provider` and rewrites the key
-  before the lookup. When the wrapped provider is itself an `Adapter`, its
-  `CfgKeyAdapt` runs on the result, which is how chained adapters compose.
+  before the lookup. `CfgKey` applies only its own rewrite and delegates, so
+  each nested adapter rewrites the key once; `CfgKeyAdapt` returns the key
+  after every nested rewrite.
 - **`parsers.go`** — `Parse*` turn a raw value into a typed one; every error
   is a `*FieldErrors` keyed by the configuration key.
 - **`error_types.go`** — the package's `xrr` error domain: `Error`,
   `FieldErrors`, their constructors, and `IsConfigError`.
-- **`helpers.go`** — prefix and map utilities, path validators, and the
-  unexported `maybeDecode` and `doubleQuoteEscape`.
+- **`keys.go`** — key-prefix functions and `GetOr`.
+- **`checks.go`** — path validators `CheckDirExists` and `CheckAbsPath`.
+- **`helpers.go`** — generic helpers (`Open`, `Merge`, `DirExists`,
+  `EnvSplit`) and the unexported `maybeDecode` and `doubleQuoteEscape`.
 
 ### Encoded configuration
 
@@ -61,8 +64,8 @@ Every `Provider.CfgKey` implementation must return an `Error` or a
   `github.com/ctx42/xrr/pkg/xrr/xrrtest`, with
   `// --- Given ---` / `// --- When ---` / `// --- Then ---` blocks.
 - Test helpers take `tester.T` and are tested with `tester.Spy`.
-- Unexported functions needed by the black-box `xcfg_test` package are
-  exported for tests in `all_test.go`.
+- Unexported functions are tested from the white-box `package xcfg` tests;
+  `xcfg_test.go` and `example_test.go` are black-box.
 - Runnable examples live in `pkg/xcfg/example_test.go`; the README embeds
   them through `gmmce` markers, so keep both in sync.
 - Line width is 80 columns (`.editorconfig`).
