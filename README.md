@@ -14,17 +14,24 @@ with errors that name the offending key.
 
 ## Features
 
-| Feature           | What it gives you                                               |
-|-------------------|-----------------------------------------------------------------|
-| `Provider`        | One-method interface: `CfgKey(key) (string, error)`.            |
-| Loading           | `New` (reader), `NewFromPath` (file), `NewFromEnv` (env list).  |
-| Env overrides     | `WithEnv` overwrites file keys with matching env values.        |
-| Encoded configs   | `Config.Encode` / `base64:` input carry a config in one string. |
-| Key adapters      | Add, strip, change prefixes, or translate keys via a map.       |
-| Typed parsers     | `ParseInteger`, `ParseBool`, `ParseDur`, `ParseTime`, ...       |
-| Validators        | `CheckAbsPath`, `CheckDirExists`.                               |
-| Structured errors | Error codes and per-key field errors built on `ctx42/xrr`.      |
-| Test fakes        | `xcfgtest.Fake`: a mutable, goroutine-safe `Provider`.          |
+- `Provider`: a one-method interface, `CfgKey(key) (string, error)`.
+- Loading from a reader (`New`), a file (`NewFromPath`), or an environment
+  list (`NewFromEnv`).
+- Environment overrides: `WithEnv` overwrites file keys with matching
+  environment values.
+- Encoded configurations: `Config.Encode` and `base64:` input carry a whole
+  configuration in one string.
+- Key adapters that add, strip, or change prefixes, or translate keys
+  through a map.
+- Key helpers: prefix functions for single keys and whole maps
+  (`StripPrefixes`, `AddPrefixes`, `ChangePrefix`), `GetOr` defaults, and
+  `Merge`.
+- Typed parsers: `ParseInteger`, `ParseBool`, `ParseDur`, `ParseTime`,
+  `ParseTimezone`.
+- Validators: `CheckAbsPath`, `CheckDirExists`.
+- Structured errors: error codes and per-key field errors built on
+  `ctx42/xrr`.
+- Test fakes: `xcfgtest.Fake`, a mutable, goroutine-safe `Provider`.
 
 ## Prerequisites
 
@@ -117,11 +124,11 @@ fmt.Println(host)
 
 ### Errors
 
-Every error belongs to the package's `xrr` error domain (`IsConfigError`) and
-carries a code: `ECCfgError`, `ECCfgKeyMissing`, `ECCfgKeyEmpty`,
-`ECCfgKeyInvFormat`, `ECCfgKeyInvValue`, or `ECCfgFileNotFound`. Key-level
-errors are `*FieldErrors` keyed by the configuration key, so
-`errors.Is(err, xcfg.ErrKeyMissing)` works through them.
+Errors from loading, providers, parsers, and checks belong to the package's
+`xrr` error domain (`IsConfigError`) and carry a code: `ECCfgError`,
+`ECCfgKeyMissing`, `ECCfgKeyEmpty`, `ECCfgKeyInvFormat`, `ECCfgKeyInvValue`,
+or `ECCfgFileNotFound`. Key-level errors are `*FieldErrors` keyed by the
+configuration key, so `errors.Is(err, xcfg.ErrKeyMissing)` works through them.
 
 ### Testing
 
@@ -131,6 +138,8 @@ helpers that load a configuration or fail the test.
 
 ```go
 import "github.com/ctx42/xcfg/pkg/xcfg/xcfgtest"
-
-cpv := xcfgtest.NewFake(t).Set("DB_PORT", 5432).Set("TIMEOUT", time.Second)
 ```
+
+Build one with `xcfgtest.NewFake(t).Set("DB_PORT", 5432)`. `Set` takes a
+string, `int`, float, `bool`, `time.Time`, `time.Duration`, `*time.Location`,
+or any `fmt.Stringer`.
