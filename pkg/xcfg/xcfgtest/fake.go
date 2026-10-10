@@ -39,27 +39,16 @@ func NewFake(t tester.T) *Fake {
 	}
 }
 
-// FakeLoad returns a [Fake] holding the configuration loaded from pth.
-// Calls t.Error() and returns nil on error.
+// FakeLoad returns a [Fake] holding the configuration [NewFromPath] loads
+// from pth. Calls t.Error() and returns nil on error.
 func FakeLoad(t tester.T, pth string) *Fake {
 	t.Helper()
 
-	rdr := Open(t, pth)
-	if rdr == nil {
+	cfg := NewFromPath(t, pth)
+	if cfg == nil {
 		return nil
 	}
-
-	cfg, err := xcfg.New(rdr)
-	if err != nil {
-		t.Error(err)
-		return nil
-	}
-
-	cpf := NewFake(t)
-	for k, v := range cfg {
-		cpf.Set(k, v)
-	}
-	return cpf
+	return NewFake(t).SetFrom(cfg)
 }
 
 // Reader returns a reader over the configuration in the dotenv format, as
