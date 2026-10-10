@@ -44,6 +44,18 @@ func Test_Adaptor(t *testing.T) {
 }
 
 func Test_Adaptor_CfgKey(t *testing.T) {
+	t.Run("error - zero value", func(t *testing.T) {
+		// --- Given ---
+		var adr Adaptor
+
+		// --- When ---
+		have, err := adr.CfgKey("K")
+
+		// --- Then ---
+		xrrtest.AssertFieldIs(t, "K", ErrKeyMissing, err)
+		assert.Equal(t, "", have)
+	})
+
 	t.Run("nested adapters applied once", func(t *testing.T) {
 		// --- Given ---
 		cpv := Config{"A_B_K": "1"}

@@ -171,8 +171,12 @@ func (cfg Config) Encode() string {
 	return prefix64 + base64.RawURLEncoding.EncodeToString([]byte(data))
 }
 
-// SetFrom sets configuration from the map.
+// SetFrom sets configuration from the map. On a nil [Config] it allocates a
+// new one, so always use the returned value.
 func (cfg Config) SetFrom(m map[string]string) Config {
+	if cfg == nil {
+		cfg = make(Config, len(m))
+	}
 	for key, val := range m {
 		cfg[key] = val
 	}

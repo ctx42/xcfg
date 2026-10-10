@@ -27,8 +27,14 @@ type Adaptor struct {
 	cpv    Provider          // Provider to translate keys for.
 }
 
+// CfgKey returns [ErrKeyMissing] for every key when the [Adaptor] is the zero
+// value, which wraps no provider.
 func (adr Adaptor) CfgKey(key string) (string, error) {
-	return adr.cpv.CfgKey(adr.adapt(key))
+	key = adr.adapt(key)
+	if adr.cpv == nil {
+		return "", NewFieldError(key, ErrKeyMissing)
+	}
+	return adr.cpv.CfgKey(key)
 }
 
 func (adr Adaptor) CfgKeyAdapt(key string) string {

@@ -483,26 +483,39 @@ func Test_Config_Encode(t *testing.T) {
 }
 
 func Test_Config_SetFrom(t *testing.T) {
-	// --- Given ---
-	cfg := Config(map[string]string{"KEY0": "VAL0"})
-	m := map[string]string{
-		"KEY0": "VAL99",
-		"KEY1": "VAL1",
-	}
+	t.Run("set", func(t *testing.T) {
+		// --- Given ---
+		cfg := Config(map[string]string{"KEY0": "VAL0"})
+		m := map[string]string{
+			"KEY0": "VAL99",
+			"KEY1": "VAL1",
+		}
 
-	// --- When ---
-	have := cfg.SetFrom(m)
+		// --- When ---
+		have := cfg.SetFrom(m)
 
-	// --- Then ---
-	assert.Same(t, cfg, have)
+		// --- Then ---
+		assert.Same(t, cfg, have)
 
-	val, err := cfg.CfgKey("KEY0")
-	assert.NoError(t, err)
-	assert.Equal(t, "VAL99", val)
+		val, err := cfg.CfgKey("KEY0")
+		assert.NoError(t, err)
+		assert.Equal(t, "VAL99", val)
 
-	val, err = cfg.CfgKey("KEY1")
-	assert.NoError(t, err)
-	assert.Equal(t, "VAL1", val)
+		val, err = cfg.CfgKey("KEY1")
+		assert.NoError(t, err)
+		assert.Equal(t, "VAL1", val)
+	})
+
+	t.Run("nil config", func(t *testing.T) {
+		// --- Given ---
+		var cfg Config
+
+		// --- When ---
+		have := cfg.SetFrom(map[string]string{"KEY": "VAL"})
+
+		// --- Then ---
+		assert.Equal(t, Config{"KEY": "VAL"}, have)
+	})
 }
 
 func Test_maybeDecode(t *testing.T) {

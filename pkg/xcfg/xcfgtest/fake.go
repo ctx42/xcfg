@@ -18,7 +18,8 @@ import (
 	"github.com/ctx42/xcfg/pkg/xcfg"
 )
 
-// Fake is fake configuration provider.
+// Fake is fake configuration provider. Create it with [NewFake] or
+// [FakeLoad]; the zero value is not usable.
 type Fake struct {
 	mx  sync.RWMutex      // Guards map.
 	cfg map[string]string // Configuration.
