@@ -28,11 +28,20 @@ type Adaptor struct {
 }
 
 func (adr Adaptor) CfgKey(key string) (string, error) {
-	adapted := adr.CfgKeyAdapt(key)
-	return adr.cpv.CfgKey(adapted)
+	return adr.cpv.CfgKey(adr.adapt(key))
 }
 
 func (adr Adaptor) CfgKeyAdapt(key string) string {
+	key = adr.adapt(key)
+	if t, ok := adr.cpv.(Adapter); ok {
+		return t.CfgKeyAdapt(key)
+	}
+	return key
+}
+
+// adapt applies this adapter's key transformation only, without the
+// transformations of the adapters it wraps.
+func (adr Adaptor) adapt(key string) string {
 	switch adr.kind {
 	case wAddPrefix:
 		key = Prefix(adr.prefix, key)
@@ -48,9 +57,6 @@ func (adr Adaptor) CfgKeyAdapt(key string) string {
 		if keyS != key {
 			key = Prefix(adr.prefix, keyS)
 		}
-	}
-	if t, ok := adr.cpv.(Adapter); ok {
-		return t.CfgKeyAdapt(key)
 	}
 	return key
 }

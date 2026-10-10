@@ -43,6 +43,45 @@ func Test_Adaptor(t *testing.T) {
 	})
 }
 
+func Test_Adaptor_CfgKey(t *testing.T) {
+	t.Run("nested adapters applied once", func(t *testing.T) {
+		// --- Given ---
+		cpv := Config{"A_B_K": "1"}
+		adr := AddAdapter(AddAdapter(cpv, "A"), "B")
+
+		// --- When ---
+		have, err := adr.CfgKey("K")
+
+		// --- Then ---
+		assert.NoError(t, err)
+		assert.Equal(t, "1", have)
+	})
+}
+
+func Test_Adaptor_CfgKeyAdapt(t *testing.T) {
+	t.Run("single adapter", func(t *testing.T) {
+		// --- Given ---
+		adr := AddAdapter(Config{}, "A")
+
+		// --- When ---
+		have := adr.CfgKeyAdapt("K")
+
+		// --- Then ---
+		assert.Equal(t, "A_K", have)
+	})
+
+	t.Run("nested adapters", func(t *testing.T) {
+		// --- Given ---
+		adr := AddAdapter(AddAdapter(Config{}, "A"), "B")
+
+		// --- When ---
+		have := adr.CfgKeyAdapt("K")
+
+		// --- Then ---
+		assert.Equal(t, "A_B_K", have)
+	})
+}
+
 func Test_AddAdapter(t *testing.T) {
 	t.Run("existing key", func(t *testing.T) {
 		// --- Given ---
