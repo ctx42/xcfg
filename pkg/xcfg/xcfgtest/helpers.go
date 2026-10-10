@@ -22,9 +22,9 @@ func Open(t tester.T, pth string) *bytes.Reader {
 	return r
 }
 
-// NewFromPath returns new configuration provider from path.
-// Calls t.Error() on error.
-func NewFromPath(t tester.T, pth string) xcfg.Provider {
+// NewFromPath returns new configuration from path.
+// Calls t.Error() and returns nil on error.
+func NewFromPath(t tester.T, pth string) xcfg.Config {
 	t.Helper()
 	rdr := Open(t, pth)
 	if rdr == nil {
@@ -34,17 +34,19 @@ func NewFromPath(t tester.T, pth string) xcfg.Provider {
 	cfg, err := xcfg.New(rdr)
 	if err != nil {
 		t.Error(err)
+		return nil
 	}
 	return cfg
 }
 
-// NewFromReader returns new configuration provider form reader.
-// Calls t.Error() on error.
-func NewFromReader(t tester.T, rdr io.Reader) xcfg.Provider {
+// NewFromReader returns new configuration form reader.
+// Calls t.Error() and returns nil on error.
+func NewFromReader(t tester.T, rdr io.Reader) xcfg.Config {
 	t.Helper()
 	cfg, err := xcfg.New(rdr)
 	if err != nil {
 		t.Error(err)
+		return nil
 	}
 	return cfg
 }
