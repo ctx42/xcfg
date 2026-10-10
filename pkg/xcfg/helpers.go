@@ -6,11 +6,14 @@ package xcfg
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"io"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/ctx42/dotenv/pkg/dotenv"
 	"github.com/ctx42/xrr/pkg/xrr"
@@ -127,11 +130,12 @@ func Merge(dst map[string]string, src ...map[string]string) map[string]string {
 	return dst
 }
 
-// DirExists returns true if pth points to an existing directory.
+// DirExists returns true if pth points to an existing directory. A path that
+// does not exist, or that runs through a regular file, is not an error.
 func DirExists(pth string) (bool, error) {
 	fi, err := os.Stat(pth)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) || errors.Is(err, syscall.ENOTDIR) {
 			return false, nil
 		}
 		return false, err

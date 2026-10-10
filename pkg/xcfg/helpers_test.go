@@ -433,6 +433,7 @@ func Test_DirExists_tabular(t *testing.T) {
 		{"2", "testdata/not_existing.conf", false},
 		{"3", "testdata", true},
 		{"4", "testdata/link.conf", false},
+		{"5", "testdata/equals.conf/sub", false}, // Under a file.
 	}
 
 	for _, tc := range tt {
@@ -462,6 +463,16 @@ func Test_CheckDirExists(t *testing.T) {
 
 		// --- Then ---
 		assert.SameType(t, &FieldErrors{}, err)
+		wMsg := "KEY_NAME: config key points to not existing directory"
+		assert.ErrorEqual(t, wMsg, err)
+		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
+	})
+
+	t.Run("path under a file", func(t *testing.T) {
+		// --- When ---
+		err := CheckDirExists("KEY_NAME", "testdata/equals.conf/sub")
+
+		// --- Then ---
 		wMsg := "KEY_NAME: config key points to not existing directory"
 		assert.ErrorEqual(t, wMsg, err)
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
