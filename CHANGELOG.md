@@ -1,3 +1,6 @@
+## v0.1.2 (Sun, 18 Oct 2026 08:25:15 UTC)
+- chore(deps): update dependencies.
+
 ## v0.1.1 (Thu, 15 Oct 2026 15:01:27 UTC)
 - chore(deps): update dependencies.
 
