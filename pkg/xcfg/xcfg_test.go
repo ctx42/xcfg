@@ -372,6 +372,23 @@ func Test_Config_CfgKey(t *testing.T) {
 	})
 }
 
+func Test_Config_Marshal(t *testing.T) {
+	t.Run("error - invalid keys", func(t *testing.T) {
+		// --- Given ---
+		cfg := Config{"A B": "1", "A=B": "2", "OK": "3"}
+
+		// --- When ---
+		have, err := cfg.Marshal()
+
+		// --- Then ---
+		_, _ = assert.SameType(t, &FieldErrors{}, err)
+		xrrtest.AssertFieldIs(t, "A B", ErrKeyInvalid, err)
+		xrrtest.AssertFieldIs(t, "A=B", ErrKeyInvalid, err)
+		xrrtest.AssertFieldCode(t, "A=B", ECCfgKeyInvValue, err)
+		assert.Empty(t, have)
+	})
+}
+
 func Test_Config_Marshal_tabular(t *testing.T) {
 	tt := []struct {
 		testN string
@@ -393,34 +410,47 @@ func Test_Config_Marshal_tabular(t *testing.T) {
 			cfg := Config{"K": tc.val}
 
 			// --- When ---
-			have := cfg.Marshal()
+			have, err := cfg.Marshal()
 
 			// --- Then ---
+			assert.NoError(t, err)
 			assert.Equal(t, tc.want, have)
 		})
 	}
 }
 
 func Test_Config_Encode(t *testing.T) {
-	// --- Given ---
-	m := map[string]string{
-		"LOG_DIR": "/var/log",
-		"VALUE":   "value",
-	}
-	cfg := Config(m)
+	t.Run("encode", func(t *testing.T) {
+		// --- Given ---
+		m := map[string]string{
+			"LOG_DIR": "/var/log",
+			"VALUE":   "value",
+		}
+		cfg := Config(m)
 
-	// --- When ---
-	have := cfg.Encode()
+		// --- When ---
+		have, err := cfg.Encode()
 
-	// --- Then ---
-	want := "base64:TE9HX0RJUj0iL3Zhci9sb2ciClZBTFVFPSJ2YWx1ZSI"
-	assert.Equal(t, want, have)
+		// --- Then ---
+		assert.NoError(t, err)
+		want := "base64:TE9HX0RJUj0iL3Zhci9sb2ciClZBTFVFPSJ2YWx1ZSI"
+		assert.Equal(t, want, have)
 
-	check := must.Value(base64.RawURLEncoding.DecodeString(want[7:]))
-	want = "" +
-		"LOG_DIR=\"/var/log\"\n" +
-		"VALUE=\"value\""
-	assert.Equal(t, want, string(check))
+		check := must.Value(base64.RawURLEncoding.DecodeString(want[7:]))
+		want = "" +
+			"LOG_DIR=\"/var/log\"\n" +
+			"VALUE=\"value\""
+		assert.Equal(t, want, string(check))
+	})
+
+	t.Run("error - invalid key", func(t *testing.T) {
+		// --- When ---
+		have, err := Config{"A B": "1"}.Encode()
+
+		// --- Then ---
+		xrrtest.AssertFieldIs(t, "A B", ErrKeyInvalid, err)
+		assert.Empty(t, have)
+	})
 }
 
 func Test_Config_SetFrom(t *testing.T) {
@@ -470,7 +500,7 @@ func Test_Unmarshal(t *testing.T) {
 		cfg := Config{"K": "a\\b\r\n!$`\"' #c"}
 
 		// --- When ---
-		have, err := Unmarshal(cfg.Marshal())
+		have, err := Unmarshal(must.Value(cfg.Marshal()))
 
 		// --- Then ---
 		assert.NoError(t, err)
@@ -505,7 +535,7 @@ func Test_Unmarshal_tabular(t *testing.T) {
 			cfg := must.Value(New(xcfgtest.Open(t, tc.fixture)))
 
 			// --- When ---
-			have, err := Unmarshal(cfg.Marshal())
+			have, err := Unmarshal(must.Value(cfg.Marshal()))
 
 			// --- Then ---
 			assert.NoError(t, err)

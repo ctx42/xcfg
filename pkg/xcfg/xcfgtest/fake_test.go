@@ -95,21 +95,39 @@ func Test_FakeLoad(t *testing.T) {
 }
 
 func Test_Fake_Reader(t *testing.T) {
-	// --- Given ---
-	tspy := tester.New(t)
-	tspy.Close()
+	t.Run("read", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
 
-	cpf := FakeLoad(tspy, "../testdata/example0.conf")
+		cpf := FakeLoad(tspy, "../testdata/example0.conf")
 
-	// --- When ---
-	have := cpf.Reader()
+		// --- When ---
+		have := cpf.Reader()
 
-	// --- Then ---
-	want := "" +
-		"ABS_DIR=\"/some/absolute/path/log\"\n" +
-		"LOG_DIR=\"tmp/log\"\n" +
-		"VALUE=0"
-	assert.Equal(t, want, iokit.ReadAllStr(t, have))
+		// --- Then ---
+		want := "" +
+			"ABS_DIR=\"/some/absolute/path/log\"\n" +
+			"LOG_DIR=\"tmp/log\"\n" +
+			"VALUE=0"
+		assert.Equal(t, want, iokit.ReadAllStr(t, have))
+	})
+
+	t.Run("error - invalid key", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.ExpectError()
+		tspy.ExpectLogContain("A B: config key invalid")
+		tspy.Close()
+
+		cpf := NewFake(tspy).Set("A B", "1")
+
+		// --- When ---
+		have := cpf.Reader()
+
+		// --- Then ---
+		assert.Equal(t, "", iokit.ReadAllStr(t, have))
+	})
 }
 
 func Test_Fake_Set(t *testing.T) {
@@ -457,29 +475,66 @@ func Test_Fake_Save(t *testing.T) {
 		// --- Then ---
 		assert.Empty(t, pth)
 	})
+
+	t.Run("error - invalid key", func(t *testing.T) {
+		// --- Given ---
+		dir := t.TempDir()
+
+		tspy := tester.New(t)
+		tspy.ExpectError()
+		tspy.ExpectLogContain("A B: config key invalid")
+		tspy.Close()
+
+		cpf := NewFake(tspy).Set("A B", "1")
+
+		// --- When ---
+		pth := cpf.Save(dir, "my.conf")
+
+		// --- Then ---
+		assert.Empty(t, pth)
+		assert.NoFileExist(t, filepath.Join(dir, "my.conf"))
+	})
 }
 
 func Test_Fake_Encode(t *testing.T) {
-	// --- Given ---
-	tspy := tester.New(t)
-	tspy.Close()
+	t.Run("encode", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.Close()
 
-	cpf := NewFake(tspy)
-	cpf.Set("LOG_DIR", "/var/log")
-	cpf.Set("VALUE", "value")
+		cpf := NewFake(tspy)
+		cpf.Set("LOG_DIR", "/var/log")
+		cpf.Set("VALUE", "value")
 
-	// --- When ---
-	have := cpf.Encode()
+		// --- When ---
+		have := cpf.Encode()
 
-	// --- Then ---
-	want := "base64:TE9HX0RJUj0iL3Zhci9sb2ciClZBTFVFPSJ2YWx1ZSI"
-	assert.Equal(t, want, have)
+		// --- Then ---
+		want := "base64:TE9HX0RJUj0iL3Zhci9sb2ciClZBTFVFPSJ2YWx1ZSI"
+		assert.Equal(t, want, have)
 
-	check := must.Value(base64.RawURLEncoding.DecodeString(want[7:]))
-	want = "" +
-		"LOG_DIR=\"/var/log\"\n" +
-		"VALUE=\"value\""
-	assert.Equal(t, want, string(check))
+		check := must.Value(base64.RawURLEncoding.DecodeString(want[7:]))
+		want = "" +
+			"LOG_DIR=\"/var/log\"\n" +
+			"VALUE=\"value\""
+		assert.Equal(t, want, string(check))
+	})
+
+	t.Run("error - invalid key", func(t *testing.T) {
+		// --- Given ---
+		tspy := tester.New(t)
+		tspy.ExpectError()
+		tspy.ExpectLogContain("A B: config key invalid")
+		tspy.Close()
+
+		cpf := NewFake(tspy).Set("A B", "1")
+
+		// --- When ---
+		have := cpf.Encode()
+
+		// --- Then ---
+		assert.Empty(t, have)
+	})
 }
 
 func Test_Fake_SetEnv(t *testing.T) {

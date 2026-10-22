@@ -220,6 +220,21 @@ func Test_keyError(t *testing.T) {
 	xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvFormat, have)
 }
 
+func Test_keyCause(t *testing.T) {
+	// --- Given ---
+	cause := errors.New("cause")
+
+	// --- When ---
+	have := keyCause(ErrKeyInvalid, cause)
+
+	// --- Then ---
+	_, _ = assert.SameType(t, &Error{}, have)
+	assert.ErrorEqual(t, "config key invalid; cause", have)
+	assert.ErrorIs(t, ErrKeyInvalid, have)
+	assert.ErrorIs(t, cause, have)
+	xrrtest.AssertCode(t, ECCfgKeyInvValue, have)
+}
+
 func Test_IsConfigError(t *testing.T) {
 	t.Run("true for Error", func(t *testing.T) {
 		// --- Given ---

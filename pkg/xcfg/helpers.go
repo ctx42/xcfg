@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
+	"unicode"
 
 	"github.com/ctx42/dotenv/pkg/dotenv"
 )
@@ -69,6 +70,15 @@ func doubleQuoteEscape(lin string) string {
 		lin = strings.ReplaceAll(lin, string(c), toReplace)
 	}
 	return lin
+}
+
+// isDotenvKey reports whether [New] reads the key back as written: it is not
+// empty and holds no "=", ":", "#", or whitespace.
+func isDotenvKey(key string) bool {
+	if key == "" || strings.ContainsAny(key, "=:#") {
+		return false
+	}
+	return strings.IndexFunc(key, unicode.IsSpace) == -1
 }
 
 // maybeDecode decodes Base64 encoded config, if needed, and returns a reader

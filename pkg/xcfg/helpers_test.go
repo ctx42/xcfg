@@ -203,6 +203,39 @@ func Test_doubleQuoteEscape_tabular(t *testing.T) {
 	}
 }
 
+func Test_isDotenvKey_tabular(t *testing.T) {
+	tt := []struct {
+		testN string
+
+		key  string
+		want bool
+	}{
+		{"upper case", "KEY_NAME", true},
+		{"lower case with dot", "key.name", true},
+		{"dash", "KEY-NAME", true},
+		{"non-ASCII", "KLUCZ_Ż", true},
+		{"empty", "", false},
+		{"equals", "A=B", false},
+		{"colon", "A:B", false},
+		{"hash", "#A", false},
+		{"space", "A B", false},
+		{"tab", "A\tB", false},
+		{"new line", "A\nB", false},
+		{"carriage return", "A\rB", false},
+		{"no-break space", "\u00a0A", false},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.testN, func(t *testing.T) {
+			// --- When ---
+			have := isDotenvKey(tc.key)
+
+			// --- Then ---
+			assert.Equal(t, tc.want, have)
+		})
+	}
+}
+
 func Test_maybeDecode(t *testing.T) {
 	t.Run("not encoded config", func(t *testing.T) {
 		// --- Given ---

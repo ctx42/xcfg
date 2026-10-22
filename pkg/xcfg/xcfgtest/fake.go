@@ -52,12 +52,18 @@ func FakeLoad(t tester.T, pth string) *Fake {
 }
 
 // Reader returns a reader over the configuration in the dotenv format, as
-// [xcfg.Config.Marshal] writes it.
+// [xcfg.Config.Marshal] writes it. Calls t.Error() and returns an empty
+// reader on error.
 func (cpf *Fake) Reader() io.Reader {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
+	cpf.t.Helper()
 
-	return strings.NewReader(xcfg.Config(cpf.cfg).Marshal())
+	data, err := xcfg.Config(cpf.cfg).Marshal()
+	if err != nil {
+		cpf.t.Error(err)
+	}
+	return strings.NewReader(data)
 }
 
 // Set sets the key to the string form of the value and returns the [Fake].
@@ -149,6 +155,7 @@ func (cpf *Fake) Reset() {
 
 // Save writes the configuration to the file name in dir and returns its path.
 // An empty dir means a temporary directory, removed when the test finishes.
+// Calls t.Error() and returns an empty string on error.
 func (cpf *Fake) Save(dir, name string) string {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
@@ -159,22 +166,30 @@ func (cpf *Fake) Save(dir, name string) string {
 	}
 	pth := filepath.Join(dir, name)
 
-	cfg := xcfg.Config(cpf.cfg)
-	data := cfg.Marshal()
-
-	if err := os.WriteFile(pth, []byte(data), 0600); err != nil {
+	data, err := xcfg.Config(cpf.cfg).Marshal()
+	if err != nil {
+		cpf.t.Error(err)
+		return ""
+	}
+	if err = os.WriteFile(pth, []byte(data), 0600); err != nil {
 		cpf.t.Error(err.Error())
 		return ""
 	}
 	return pth
 }
 
-// Encode encodes the config the same way [xcfg.Config.Encode] does.
+// Encode encodes the config the same way [xcfg.Config.Encode] does. Calls
+// t.Error() and returns an empty string on error.
 func (cpf *Fake) Encode() string {
 	cpf.mx.RLock()
 	defer cpf.mx.RUnlock()
+	cpf.t.Helper()
 
-	return xcfg.Config(cpf.cfg).Encode()
+	enc, err := xcfg.Config(cpf.cfg).Encode()
+	if err != nil {
+		cpf.t.Error(err)
+	}
+	return enc
 }
 
 // SetEnv sets an environment variable for every configuration key using the

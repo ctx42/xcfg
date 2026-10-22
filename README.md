@@ -81,7 +81,7 @@ in the given environment.
 
 <!-- gmmce:pkg/xcfg/ExampleNewFromPath -->
 ```go
-enc := xcfg.Config{"LOG_LEVEL": "info"}.Encode()
+enc, _ := xcfg.Config{"LOG_LEVEL": "info"}.Encode()
 env := []string{"LOG_LEVEL=debug"}
 
 cfg, _ := xcfg.NewFromPath(enc, xcfg.WithEnv(env))

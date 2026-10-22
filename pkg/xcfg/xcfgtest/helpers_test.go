@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ctx42/testing/pkg/assert"
+	"github.com/ctx42/testing/pkg/must"
 	"github.com/ctx42/testing/pkg/tester"
 	"github.com/ctx42/testkit/pkg/iokit"
 	"github.com/ctx42/testkit/pkg/oskit"
@@ -63,8 +64,10 @@ func Test_NewFromPath(t *testing.T) {
 		tspy := tester.New(t)
 		tspy.Close()
 
+		enc := must.Value(xcfg.Config{"KEY": "VAL"}.Encode())
+
 		// --- When ---
-		have := NewFromPath(tspy, xcfg.Config{"KEY": "VAL"}.Encode())
+		have := NewFromPath(tspy, enc)
 
 		// --- Then ---
 		assert.Equal(t, xcfg.Config{"KEY": "VAL"}, have)

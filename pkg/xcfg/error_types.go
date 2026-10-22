@@ -94,13 +94,17 @@ func NewFieldErrors(fields map[string]error) *FieldErrors {
 	return xrr.NewFields[edError](fields)
 }
 
-// keyError returns a [FieldErrors] for the key holding an [Error] with the
-// code of the sentinel, which wraps both the sentinel and the cause, so
-// [errors.Is] matches either of them.
+// keyError returns a [FieldErrors] for the key holding the error keyCause
+// builds from the sentinel and the cause.
 func keyError(key string, sentinel, cause error) *FieldErrors {
+	return NewFieldError(key, keyCause(sentinel, cause))
+}
+
+// keyCause returns an [Error] with the code of the sentinel, which wraps both
+// the sentinel and the cause, so [errors.Is] matches either of them.
+func keyCause(sentinel, cause error) error {
 	err := fmt.Errorf("%w: %w", sentinel, cause)
-	err = NewError("", xrr.GetCode(sentinel), xrr.WithCause(err))
-	return NewFieldError(key, err)
+	return NewError("", xrr.GetCode(sentinel), xrr.WithCause(err))
 }
 
 // IsConfigError reports whether the error is a non-nil [Error] or

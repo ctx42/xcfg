@@ -6,6 +6,7 @@ package xcfg
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -144,26 +145,41 @@ func (cfg Config) CfgKey(key string) (string, error) {
 
 // Marshal outputs the given configuration map as a dotenv-formatted file.
 // Each line is in the format: KEY="VALUE" where VALUE is backslash-escaped.
-// Keys are written verbatim, so [New] reads back only keys valid in dotenv:
-// non-empty, without "=", ":", or whitespace, and not starting with "#".
-func (cfg Config) Marshal() string {
+// Keys are written verbatim, so a key [New] cannot read back — empty, or
+// holding "=", ":", "#", or whitespace — is an error: a [FieldErrors]
+// wrapping [ErrKeyInvalid] for every such key.
+func (cfg Config) Marshal() (string, error) {
+	var ers map[string]error
 	lns := make([]string, 0, len(cfg))
 	for k, v := range cfg {
+		if !isDotenvKey(k) {
+			if ers == nil {
+				ers = make(map[string]error)
+			}
+			ers[k] = keyCause(ErrKeyInvalid, errors.New("not a dotenv key"))
+			continue
+		}
 		if d, err := strconv.Atoi(v); err == nil && strconv.Itoa(d) == v {
 			lns = append(lns, k+"="+v)
 		} else {
 			lns = append(lns, k+`="`+doubleQuoteEscape(v)+`"`)
 		}
 	}
+	if ers != nil {
+		return "", NewFieldErrors(ers)
+	}
 	sort.Strings(lns)
-	return strings.Join(lns, "\n")
+	return strings.Join(lns, "\n"), nil
 }
 
 // Encode encodes the config as an unpadded URL-safe Base64 string with
 // the `base64:` prefix. Keys follow the same rules as in [Config.Marshal].
-func (cfg Config) Encode() string {
-	data := cfg.Marshal()
-	return prefix64 + base64.RawURLEncoding.EncodeToString([]byte(data))
+func (cfg Config) Encode() (string, error) {
+	data, err := cfg.Marshal()
+	if err != nil {
+		return "", err
+	}
+	return prefix64 + base64.RawURLEncoding.EncodeToString([]byte(data)), nil
 }
 
 // SetFrom sets configuration from the map. On a nil [Config] it allocates a
