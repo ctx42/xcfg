@@ -5,6 +5,7 @@ package xcfg
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/ctx42/xrr/pkg/xrr"
 )
@@ -91,6 +92,15 @@ func NewFieldError(field string, err error) *FieldErrors {
 // stored directly without copying.
 func NewFieldErrors(fields map[string]error) *FieldErrors {
 	return xrr.NewFields[edError](fields)
+}
+
+// keyError returns a [FieldErrors] for the key holding an [Error] with the
+// code of the sentinel, which wraps both the sentinel and the cause, so
+// [errors.Is] matches either of them.
+func keyError(key string, sentinel, cause error) *FieldErrors {
+	err := fmt.Errorf("%w: %w", sentinel, cause)
+	err = NewError("", xrr.GetCode(sentinel), xrr.WithCause(err))
+	return NewFieldError(key, err)
 }
 
 // IsConfigError reports whether the error is a non-nil [Error] or

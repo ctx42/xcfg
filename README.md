@@ -128,7 +128,9 @@ Errors from loading, providers, parsers, and checks belong to the package's
 `xrr` error domain (`IsConfigError`) and carry a code: `ECCfgError`,
 `ECCfgKeyMissing`, `ECCfgKeyEmpty`, `ECCfgKeyInvFormat`, `ECCfgKeyInvValue`,
 or `ECCfgFileNotFound`. Key-level errors are `*FieldErrors` keyed by the
-configuration key, so `errors.Is(err, xcfg.ErrKeyMissing)` works through them.
+configuration key and wrap one of the sentinels `ErrKeyMissing`,
+`ErrKeyEmpty`, `ErrKeyInvalid`, or `ErrKeyInvFormat`, so
+`errors.Is(err, xcfg.ErrKeyInvFormat)` works through them.
 
 ### Testing
 

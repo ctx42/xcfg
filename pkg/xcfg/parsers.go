@@ -6,8 +6,6 @@ package xcfg
 import (
 	"strconv"
 	"time"
-
-	"github.com/ctx42/xrr/pkg/xrr"
 )
 
 // ParseTime parses a configuration key as RFC3339 time.
@@ -18,9 +16,7 @@ func ParseTime(key, val string) (time.Time, error) {
 
 	tim, err := time.Parse(time.RFC3339Nano, val)
 	if err != nil {
-		msg := "invalid config key RFC3339 format"
-		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
-		return time.Time{}, NewFieldError(key, err)
+		return time.Time{}, keyError(key, ErrKeyInvFormat, err)
 	}
 	return tim, nil
 }
@@ -34,9 +30,7 @@ func ParseDur(key, val string) (time.Duration, error) {
 	var t time.Duration
 	var err error
 	if t, err = time.ParseDuration(val); err != nil {
-		msg := "invalid config key duration format"
-		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
-		return 0, NewFieldError(key, err)
+		return 0, keyError(key, ErrKeyInvFormat, err)
 	}
 	return t, nil
 }
@@ -49,9 +43,7 @@ func ParseInteger(key, val string) (int, error) {
 
 	i, err := strconv.Atoi(val)
 	if err != nil {
-		msg := "invalid config key integer format"
-		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
-		return 0, NewFieldError(key, err)
+		return 0, keyError(key, ErrKeyInvFormat, err)
 	}
 	return i, nil
 }
@@ -64,9 +56,7 @@ func ParseTimezone(key, val string) (*time.Location, error) {
 
 	loc, err := time.LoadLocation(val)
 	if err != nil {
-		msg := "invalid config key timezone value"
-		err = NewError(msg, ECCfgKeyInvValue, xrr.WithCause(err))
-		return nil, NewFieldError(key, err)
+		return nil, keyError(key, ErrKeyInvalid, err)
 	}
 	return loc, nil
 }
@@ -89,9 +79,7 @@ func ParseBool(key, val string) (bool, error) {
 
 	b, err := strconv.ParseBool(val)
 	if err != nil {
-		msg := "invalid config key boolean format"
-		err = NewError(msg, ECCfgKeyInvFormat, xrr.WithCause(err))
-		return false, NewFieldError(key, err)
+		return false, keyError(key, ErrKeyInvFormat, err)
 	}
 	return b, nil
 }

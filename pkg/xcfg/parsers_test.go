@@ -45,7 +45,7 @@ func Test_ParseTime_tabular(t *testing.T) {
 			"KEY_NAME",
 			"2001-01-02",
 			"" +
-				"KEY_NAME: invalid config key RFC3339 format: " +
+				"KEY_NAME: config key invalid format; " +
 				"parsing time \"2001-01-02\" as " +
 				"\"2006-01-02T15:04:05.999999999Z07:00\": " +
 				"cannot parse \"\" as \"T\" (ECCfgKeyInvFormat)",
@@ -99,7 +99,7 @@ func Test_ParseDur_tabular(t *testing.T) {
 			"KEY_NAME",
 			"abc",
 			"" +
-				"KEY_NAME: invalid config key duration format: " +
+				"KEY_NAME: config key invalid format; " +
 				"time: invalid duration \"abc\" (ECCfgKeyInvFormat)",
 		},
 	}
@@ -143,6 +143,7 @@ func Test_ParseInteger(t *testing.T) {
 
 		// --- Then ---
 		assert.ErrorIs(t, strconv.ErrSyntax, err)
+		xrrtest.AssertFieldIs(t, "KEY_NAME", ErrKeyInvFormat, err)
 		assert.Equal(t, 0, have)
 	})
 }
@@ -166,7 +167,7 @@ func Test_ParseInteger_tabular(t *testing.T) {
 			"KEY_NAME",
 			"abc",
 			"" +
-				"KEY_NAME: invalid config key integer format: " +
+				"KEY_NAME: config key invalid format; " +
 				"strconv.Atoi: parsing \"abc\": invalid syntax " +
 				"(ECCfgKeyInvFormat)",
 		},
@@ -216,7 +217,7 @@ func Test_ParseTimezone_tabular(t *testing.T) {
 			"KEY_NAME",
 			"Unknown/Timezone",
 			"" +
-				"KEY_NAME: invalid config key timezone value: " +
+				"KEY_NAME: config key invalid; " +
 				"unknown time zone Unknown/Timezone (ECCfgKeyInvValue)",
 		},
 		{
@@ -224,7 +225,7 @@ func Test_ParseTimezone_tabular(t *testing.T) {
 			"KEY_NAME",
 			"123 abc",
 			"" +
-				"KEY_NAME: invalid config key timezone value: " +
+				"KEY_NAME: config key invalid; " +
 				"unknown time zone 123 abc (ECCfgKeyInvValue)",
 		},
 	}
@@ -263,7 +264,7 @@ func Test_ParseBool(t *testing.T) {
 		// --- Then ---
 		_, _ = assert.SameType(t, &FieldErrors{}, err)
 		wMsg := "" +
-			"KEY_NAME: invalid config key boolean format: " +
+			"KEY_NAME: config key invalid format; " +
 			"strconv.ParseBool: parsing \"abc\": invalid syntax " +
 			"(ECCfgKeyInvFormat)"
 		xrrtest.AssertEqual(t, wMsg, err)

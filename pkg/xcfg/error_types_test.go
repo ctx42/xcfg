@@ -205,6 +205,21 @@ func Test_NewFieldErrors(t *testing.T) {
 	})
 }
 
+func Test_keyError(t *testing.T) {
+	// --- Given ---
+	cause := errors.New("cause")
+
+	// --- When ---
+	have := keyError("KEY_NAME", ErrKeyInvFormat, cause)
+
+	// --- Then ---
+	wMsg := "KEY_NAME: config key invalid format; cause (ECCfgKeyInvFormat)"
+	xrrtest.AssertEqual(t, wMsg, have)
+	xrrtest.AssertFieldIs(t, "KEY_NAME", ErrKeyInvFormat, have)
+	xrrtest.AssertFieldIs(t, "KEY_NAME", cause, have)
+	xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvFormat, have)
+}
+
 func Test_IsConfigError(t *testing.T) {
 	t.Run("true for Error", func(t *testing.T) {
 		// --- Given ---

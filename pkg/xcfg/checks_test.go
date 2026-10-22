@@ -25,8 +25,9 @@ func Test_CheckDirExists(t *testing.T) {
 
 		// --- Then ---
 		_, _ = assert.SameType(t, &FieldErrors{}, err)
-		wMsg := "KEY_NAME: config key points to not existing directory"
+		wMsg := "KEY_NAME: config key invalid; directory does not exist"
 		assert.ErrorEqual(t, wMsg, err)
+		xrrtest.AssertFieldIs(t, "KEY_NAME", ErrKeyInvalid, err)
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
 	})
 
@@ -35,8 +36,9 @@ func Test_CheckDirExists(t *testing.T) {
 		err := CheckDirExists("KEY_NAME", "testdata/equals.conf/sub")
 
 		// --- Then ---
-		wMsg := "KEY_NAME: config key points to not existing directory"
+		wMsg := "KEY_NAME: config key invalid; directory does not exist"
 		assert.ErrorEqual(t, wMsg, err)
+		xrrtest.AssertFieldIs(t, "KEY_NAME", ErrKeyInvalid, err)
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
 	})
 
@@ -46,8 +48,9 @@ func Test_CheckDirExists(t *testing.T) {
 
 		// --- Then ---
 		_, _ = assert.SameType(t, &FieldErrors{}, err)
-		wMsg := "KEY_NAME: config key points to not existing directory"
+		wMsg := "KEY_NAME: config key invalid; directory does not exist"
 		assert.ErrorEqual(t, wMsg, err)
+		xrrtest.AssertFieldIs(t, "KEY_NAME", ErrKeyInvalid, err)
 		xrrtest.AssertFieldCode(t, "KEY_NAME", ECCfgKeyInvValue, err)
 	})
 
@@ -76,9 +79,9 @@ func Test_CheckAbsPath(t *testing.T) {
 		err := CheckAbsPath("KEY_NAME", "abs/path")
 
 		// --- Then ---
-		wMsg := "KEY_NAME: config key must be an absolute path"
+		wMsg := "KEY_NAME: config key invalid; not an absolute path"
 		assert.ErrorEqual(t, wMsg, err)
-		_, _ = xrrtest.AssertHasField(t, "KEY_NAME", err)
+		xrrtest.AssertFieldIs(t, "KEY_NAME", ErrKeyInvalid, err)
 	})
 
 	t.Run("error - empty", func(t *testing.T) {

@@ -4,6 +4,7 @@
 package xcfg
 
 import (
+	"errors"
 	"path/filepath"
 
 	"github.com/ctx42/xrr/pkg/xrr"
@@ -21,9 +22,8 @@ func CheckDirExists(key, pth string) error {
 		return NewFieldError(key, err)
 	}
 	if !ok {
-		msg := "config key points to not existing directory"
-		err = NewError(msg, ECCfgKeyInvValue)
-		return NewFieldError(key, err)
+		err = errors.New("directory does not exist")
+		return keyError(key, ErrKeyInvalid, err)
 	}
 	return nil
 }
@@ -35,9 +35,7 @@ func CheckAbsPath(key, pth string) error {
 		return NewFieldError(key, ErrKeyEmpty)
 	}
 	if !filepath.IsAbs(pth) {
-		msg := "config key must be an absolute path"
-		err := NewError(msg, ECCfgKeyInvValue)
-		return NewFieldError(key, err)
+		return keyError(key, ErrKeyInvalid, errors.New("not an absolute path"))
 	}
 	return nil
 }
