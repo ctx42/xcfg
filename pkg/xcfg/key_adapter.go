@@ -38,6 +38,8 @@ func (adr KeyAdapter) CfgKey(key string) (string, error) {
 	return adr.cpv.CfgKey(key)
 }
 
+// CfgKeyAdapt returns the key after the rewrite of this [KeyAdapter] and of
+// every [Adapter] it wraps.
 func (adr KeyAdapter) CfgKeyAdapt(key string) string {
 	key = adr.adapt(key)
 	if t, ok := adr.cpv.(Adapter); ok {

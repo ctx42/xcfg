@@ -1,7 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2026 Rafal Zajac
 // SPDX-License-Identifier: MIT
 
-// Package xcfg provides primitives for accessing configuration files.
+// Package xcfg loads key-value application configuration and reads it
+// through the one-method [Provider] interface.
+//
+// [New], [NewFromPath], and [NewFromEnv] load a [Config], a map of keys to
+// values, from dotenv text, a file, a `base64:` encoded configuration (see
+// [Config.Encode]), or an environment list; [WithEnv] overrides loaded keys
+// from the environment. Key adapters, such as [AddAdapter], wrap a
+// [Provider] and rewrite the key before the lookup, so a component reads its
+// own unprefixed keys from a shared configuration. The Parse functions, such
+// as [ParseInteger], turn raw values into typed ones, and the Check
+// functions validate paths.
+//
+// Errors belong to the package's error domain ([IsConfigError]). Key-level
+// errors are [FieldErrors] keyed by the configuration key and wrap one of
+// the key sentinels, such as [ErrKeyMissing].
 package xcfg
 
 import (
