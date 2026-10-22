@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -82,18 +83,20 @@ func isDotenvKey(key string) bool {
 }
 
 // maybeDecode decodes Base64 encoded config, if needed, and returns a reader
-// to the config.
+// to the config. It accepts the encoded data with "=" padding and surrounding
+// whitespace.
 func maybeDecode(r io.Reader) (io.Reader, error) {
 	src, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 	if enc, ok := bytes.CutPrefix(src, []byte(prefix64)); ok {
+		enc = bytes.TrimRight(bytes.TrimSpace(enc), "=")
 		dec := base64.RawURLEncoding
 		src = make([]byte, dec.DecodedLen(len(enc)))
 		var n int
 		if n, err = dec.Decode(src, enc); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("decode base64: %w", err)
 		}
 		src = src[:n]
 	}

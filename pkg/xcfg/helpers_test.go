@@ -308,9 +308,37 @@ func Test_maybeDecode(t *testing.T) {
 		have, err := maybeDecode(r)
 
 		// --- Then ---
-		assert.ErrorEqual(t, "illegal base64 data at input byte 0", err)
+		wMsg := "decode base64: illegal base64 data at input byte 0"
+		assert.ErrorEqual(t, wMsg, err)
 		assert.Nil(t, have)
 	})
+}
+
+func Test_maybeDecode_tabular(t *testing.T) {
+	tt := []struct {
+		testN string
+
+		in   string
+		want string
+	}{
+		{"padded", "base64:QT1CCkM9RA==", "A=B\nC=D"},
+		{"trailing new line", "base64:QT1CCkM9RAo\n", "A=B\nC=D\n"},
+		{"trailing CRLF", "base64:QT1CCkM9RAo\r\n", "A=B\nC=D\n"},
+		{"trailing space", "base64:QT1CCkM9RAo ", "A=B\nC=D\n"},
+		{"leading space", "base64: QT1CCkM9RAo", "A=B\nC=D\n"},
+		{"padded with new line", "base64:QT1CCkM9RA==\n", "A=B\nC=D"},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.testN, func(t *testing.T) {
+			// --- When ---
+			have, err := maybeDecode(strings.NewReader(tc.in))
+
+			// --- Then ---
+			assert.NoError(t, err)
+			assert.Equal(t, tc.want, iokit.ReadAllStr(t, have))
+		})
+	}
 }
 
 func Test_EnvSplit_tabular(t *testing.T) {

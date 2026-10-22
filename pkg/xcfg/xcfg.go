@@ -97,7 +97,8 @@ type Config map[string]string
 // New creates a new [Config] and loads the configuration from the reader.
 // Input starting with the `base64:` prefix is always decoded as a Base64
 // encoded configuration (see [Config.Encode]), so the prefix is reserved and
-// cannot start a plain dotenv file.
+// cannot start a plain dotenv file. The encoded data may carry "=" padding
+// and surrounding whitespace.
 func New(r io.Reader) (Config, error) {
 	var err error
 	cfg := make(map[string]string)

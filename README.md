@@ -74,10 +74,11 @@ The file syntax — quoting, `export` prefixes, `${VAR}` expansion — is that o
 
 `Config.Encode` packs a whole configuration into a single string: the
 `base64:` prefix followed by the dotenv text in unpadded URL-safe Base64.
-`New` decodes such input transparently, and `NewFromPath` accepts it in place
-of a file path, which is convenient for passing a configuration through one
-environment variable or flag. `WithEnv` then overwrites keys that also appear
-in the given environment.
+`New` decodes such input transparently, also with `=` padding and surrounding
+whitespace, and `NewFromPath` accepts it in place of a file path, which is
+convenient for passing a configuration through one environment variable or
+flag. `WithEnv` then overwrites keys that also appear in the given
+environment.
 
 <!-- gmmce:pkg/xcfg/ExampleNewFromPath -->
 ```go
@@ -96,7 +97,7 @@ fmt.Println(cfg["LOG_LEVEL"])
 To encode an existing file from the shell:
 
 ```bash
-echo "base64:$(basenc --base64url -w0 app.conf | tr -d '=')"
+echo "base64:$(basenc --base64url -w0 app.conf)"
 ```
 
 ### Key adapters
