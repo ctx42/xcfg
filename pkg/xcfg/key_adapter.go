@@ -13,13 +13,14 @@ const (
 
 // Compile time checks.
 var (
-	_ Provider = Adaptor{}
-	_ Adapter  = Adaptor{}
+	_ Provider = KeyAdapter{}
+	_ Adapter  = KeyAdapter{}
 )
 
-// Adaptor implements [Provider] and [Adapter] interfaces and provides
-// a couple of configuration key adaptors.
-type Adaptor struct {
+// KeyAdapter is a [Provider] that rewrites the key before the lookup in the
+// provider it wraps. Create it with [AddAdapter], [RemoveAdapter],
+// [MapAdapter], or [ChangeAdapter].
+type KeyAdapter struct {
 	kind   string            // How to transform keys.
 	from   string            // Key prefix to translate from.
 	prefix string            // Key prefix to add or strip.
@@ -27,9 +28,9 @@ type Adaptor struct {
 	cpv    Provider          // Provider to translate keys for.
 }
 
-// CfgKey returns [ErrKeyMissing] for every key when the [Adaptor] is the zero
-// value, which wraps no provider.
-func (adr Adaptor) CfgKey(key string) (string, error) {
+// CfgKey returns [ErrKeyMissing] for every key when the [KeyAdapter] is the
+// zero value, which wraps no provider.
+func (adr KeyAdapter) CfgKey(key string) (string, error) {
 	key = adr.adapt(key)
 	if adr.cpv == nil {
 		return "", NewFieldError(key, ErrKeyMissing)
@@ -37,7 +38,7 @@ func (adr Adaptor) CfgKey(key string) (string, error) {
 	return adr.cpv.CfgKey(key)
 }
 
-func (adr Adaptor) CfgKeyAdapt(key string) string {
+func (adr KeyAdapter) CfgKeyAdapt(key string) string {
 	key = adr.adapt(key)
 	if t, ok := adr.cpv.(Adapter); ok {
 		return t.CfgKeyAdapt(key)
@@ -47,7 +48,7 @@ func (adr Adaptor) CfgKeyAdapt(key string) string {
 
 // adapt applies this adapter's key transformation only, without the
 // transformations of the adapters it wraps.
-func (adr Adaptor) adapt(key string) string {
+func (adr KeyAdapter) adapt(key string) string {
 	switch adr.kind {
 	case wAddPrefix:
 		key = Prefix(adr.prefix, key)
@@ -68,8 +69,8 @@ func (adr Adaptor) adapt(key string) string {
 }
 
 // AddAdapter adapts keys by adding the prefix to every key you ask for.
-func AddAdapter(cpv Provider, prefix string) Adaptor {
-	return Adaptor{
+func AddAdapter(cpv Provider, prefix string) KeyAdapter {
+	return KeyAdapter{
 		kind:   wAddPrefix,
 		prefix: prefix,
 		cpv:    cpv,
@@ -77,8 +78,8 @@ func AddAdapter(cpv Provider, prefix string) Adaptor {
 }
 
 // RemoveAdapter adapts keys by stripping the prefix from every key you ask for.
-func RemoveAdapter(cpv Provider, prefix string) Adaptor {
-	return Adaptor{
+func RemoveAdapter(cpv Provider, prefix string) KeyAdapter {
+	return KeyAdapter{
 		kind:   wStripPrefix,
 		prefix: prefix,
 		cpv:    cpv,
@@ -86,8 +87,8 @@ func RemoveAdapter(cpv Provider, prefix string) Adaptor {
 }
 
 // MapAdapter adapts keys by translating them using given map.
-func MapAdapter(cpv Provider, tr map[string]string) Adaptor {
-	return Adaptor{
+func MapAdapter(cpv Provider, tr map[string]string) KeyAdapter {
+	return KeyAdapter{
 		kind: wTranslate,
 		tr:   tr,
 		cpv:  cpv,
@@ -95,8 +96,8 @@ func MapAdapter(cpv Provider, tr map[string]string) Adaptor {
 }
 
 // ChangeAdapter adapts keys by changing key prefix "from" to "to".
-func ChangeAdapter(cpv Provider, from, to string) Adaptor {
-	return Adaptor{
+func ChangeAdapter(cpv Provider, from, to string) KeyAdapter {
+	return KeyAdapter{
 		kind:   wPrefixTr,
 		from:   from,
 		prefix: to,

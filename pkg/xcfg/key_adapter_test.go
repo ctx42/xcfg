@@ -10,7 +10,7 @@ import (
 	"github.com/ctx42/xrr/pkg/xrr/xrrtest"
 )
 
-func Test_Adaptor_CfgKey(t *testing.T) {
+func Test_KeyAdapter_CfgKey(t *testing.T) {
 	t.Run("chained", func(t *testing.T) {
 		// --- Given ---
 		cfg := Config{"A": "1", "XX_B": "2"}
@@ -40,7 +40,7 @@ func Test_Adaptor_CfgKey(t *testing.T) {
 
 	t.Run("error - zero value", func(t *testing.T) {
 		// --- Given ---
-		var adr Adaptor
+		var adr KeyAdapter
 
 		// --- When ---
 		have, err := adr.CfgKey("K")
@@ -64,7 +64,7 @@ func Test_Adaptor_CfgKey(t *testing.T) {
 	})
 }
 
-func Test_Adaptor_CfgKeyAdapt(t *testing.T) {
+func Test_KeyAdapter_CfgKeyAdapt(t *testing.T) {
 	t.Run("single adapter", func(t *testing.T) {
 		// --- Given ---
 		adr := AddAdapter(Config{}, "A")

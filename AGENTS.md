@@ -33,7 +33,7 @@ golangci-lint run                             # lint (config is CI-provided)
   `NewFromPath` reads a file, or treats a `base64:` argument as the encoded
   configuration itself, then applies `WithEnv` overrides to keys already
   present. Also holds the error codes and sentinel errors.
-- **`key_adapter.go`** — `Adaptor` wraps a `Provider` and rewrites the key
+- **`key_adapter.go`** — `KeyAdapter` wraps a `Provider` and rewrites the key
   before the lookup. `CfgKey` applies only its own rewrite and delegates, so
   each nested adapter rewrites the key once; `CfgKeyAdapt` returns the key
   after every nested rewrite.

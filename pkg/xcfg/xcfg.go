@@ -53,7 +53,7 @@ type Provider interface {
 	CfgKey(key string) (string, error)
 }
 
-// Adapter is an interface that adapts configuration keys. See [Adaptor].
+// Adapter is an interface that adapts configuration keys. See [KeyAdapter].
 type Adapter interface {
 	// CfgKeyAdapt adapts configuration key name.
 	CfgKeyAdapt(key string) string
