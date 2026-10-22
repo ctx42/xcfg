@@ -1,3 +1,4 @@
+[![Go](https://github.com/ctx42/xcfg/actions/workflows/go.yml/badge.svg)](https://github.com/ctx42/xcfg/actions/workflows/go.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/ctx42/xcfg.svg)](https://pkg.go.dev/github.com/ctx42/xcfg)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/ctx42/xcfg)](go.mod)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
