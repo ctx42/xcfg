@@ -419,6 +419,31 @@ func Test_Config_Marshal_tabular(t *testing.T) {
 	}
 }
 
+func Fuzz_Config_Marshal(f *testing.F) {
+	f.Add("KEY", "value")
+	f.Add("K", "a\\b\r\n!$`\"' #c")
+	f.Add("K", "0755")
+	f.Add("K", "${OTHER}")
+	f.Add("A B", "1")
+
+	f.Fuzz(func(t *testing.T, key, val string) {
+		// --- Given ---
+		cfg := Config{key: val}
+
+		// --- When ---
+		data, err := cfg.Marshal()
+
+		// --- Then ---
+		if err != nil {
+			xrrtest.AssertFieldIs(t, key, ErrKeyInvalid, err)
+			return
+		}
+		have, err := Unmarshal(data)
+		assert.NoError(t, err)
+		assert.Equal(t, cfg, have)
+	})
+}
+
 func Test_Config_Encode(t *testing.T) {
 	t.Run("encode", func(t *testing.T) {
 		// --- Given ---
