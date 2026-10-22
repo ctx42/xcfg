@@ -38,7 +38,7 @@ const (
 	ECCfgKeyInvValue  = "ECCfgKeyInvValue"
 	ECCfgKeyEmpty     = "ECCfgKeyEmpty"
 	ECCfgKeyMissing   = "ECCfgKeyMissing"
-	ECCfgFileNotFound = "ECCfgFileNotFound"
+	ECCfgFileRead     = "ECCfgFileRead"
 )
 
 // Sentinel errors.
@@ -53,9 +53,10 @@ var (
 // [NewFromPath] as Base64 encoded (unpadded URL-safe alphabet).
 const prefix64 = "base64:"
 
-// ErrCfgFileNotFound is the error returned when the configuration file at the
-// given path does not exist, is not a regular file, or is not readable.
-var ErrCfgFileNotFound = NewError("config file not found", ECCfgFileNotFound)
+// ErrCfgFileRead is the error returned when the configuration file at the
+// given path cannot be read: it does not exist, is not a regular file, or is
+// not readable.
+var ErrCfgFileRead = NewError("config file not readable", ECCfgFileRead)
 
 // Provider provides configuration values.
 type Provider interface {
@@ -129,8 +130,8 @@ func NewFromPath(pth string, opts ...Option) (Config, error) {
 	} else {
 		var r io.Reader
 		if r, err = Open(pth); err != nil {
-			err = fmt.Errorf("%w: %w", ErrCfgFileNotFound, err)
-			return nil, NewError("", ECCfgFileNotFound, xrr.WithCause(err))
+			err = fmt.Errorf("%w: %w", ErrCfgFileRead, err)
+			return nil, NewError("", ECCfgFileRead, xrr.WithCause(err))
 		}
 		if cfg, err = New(r); err != nil {
 			return nil, err

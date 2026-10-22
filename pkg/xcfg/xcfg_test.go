@@ -171,7 +171,7 @@ func Test_NewFromPath(t *testing.T) {
 		have, err := NewFromPath("")
 
 		// --- Then ---
-		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.ErrorIs(t, ErrCfgFileRead, err)
 		assert.Nil(t, have)
 	})
 
@@ -183,7 +183,7 @@ func Test_NewFromPath(t *testing.T) {
 		have, err := NewFromPath("", WithEnv(env))
 
 		// --- Then ---
-		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.ErrorIs(t, ErrCfgFileRead, err)
 		assert.Nil(t, have)
 	})
 
@@ -192,7 +192,7 @@ func Test_NewFromPath(t *testing.T) {
 		have, err := NewFromPath("testdata/not_existing.conf")
 
 		// --- Then ---
-		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.ErrorIs(t, ErrCfgFileRead, err)
 		assert.Nil(t, have)
 	})
 
@@ -204,7 +204,7 @@ func Test_NewFromPath(t *testing.T) {
 		have, err := NewFromPath("testdata/not_existing.conf", WithEnv(env))
 
 		// --- Then ---
-		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.ErrorIs(t, ErrCfgFileRead, err)
 		assert.Nil(t, have)
 	})
 
@@ -213,10 +213,10 @@ func Test_NewFromPath(t *testing.T) {
 		have, err := NewFromPath("testdata")
 
 		// --- Then ---
-		assert.ErrorIs(t, ErrCfgFileNotFound, err)
+		assert.ErrorIs(t, ErrCfgFileRead, err)
 		assert.ErrorIs(t, syscall.EISDIR, err)
-		xrrtest.AssertCode(t, ECCfgFileNotFound, err)
-		wMsg := "config file not found; read testdata: is a directory"
+		xrrtest.AssertCode(t, ECCfgFileRead, err)
+		wMsg := "config file not readable; read testdata: is a directory"
 		assert.ErrorEqual(t, wMsg, err)
 		assert.Nil(t, have)
 	})
