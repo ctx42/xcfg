@@ -29,7 +29,7 @@ func Test_GetOr_tabular(t *testing.T) {
 			cfg := NewFromEnv(tc.env)
 
 			// --- When ---
-			have := GetOr(tc.key, cfg, tc.def)
+			have := GetOr(cfg, tc.key, tc.def)
 
 			// --- Then ---
 			assert.Equal(t, tc.want, have)
@@ -97,7 +97,7 @@ func Test_StripPrefixes(t *testing.T) {
 		}
 
 		// --- When ---
-		have := StripPrefixes("MY", data)
+		have := StripPrefixes(data, "MY")
 
 		// --- Then ---
 		want := map[string]string{
@@ -118,7 +118,7 @@ func Test_StripPrefixes(t *testing.T) {
 		}
 
 		// --- When ---
-		have := StripPrefixes("", data)
+		have := StripPrefixes(data, "")
 
 		// --- Then ---
 		want := map[string]string{
@@ -135,7 +135,7 @@ func Test_StripPrefixes(t *testing.T) {
 		data := map[string]string{"MY_KEY": "VAL_1", "KEY": "VAL_2"}
 
 		// --- When ---
-		have := StripPrefixes("MY", data)
+		have := StripPrefixes(data, "MY")
 
 		// --- Then ---
 		assert.Equal(t, map[string]string{"KEY": "VAL_1"}, have)
@@ -143,7 +143,7 @@ func Test_StripPrefixes(t *testing.T) {
 
 	t.Run("nil map", func(t *testing.T) {
 		// --- When ---
-		have := StripPrefixes("", nil)
+		have := StripPrefixes(nil, "")
 
 		// --- Then ---
 		assert.Nil(t, have)
@@ -160,7 +160,7 @@ func Test_AddPrefixes(t *testing.T) {
 		}
 
 		// --- When ---
-		have := AddPrefixes("MY", data)
+		have := AddPrefixes(data, "MY")
 
 		// --- Then ---
 		want := map[string]string{
@@ -181,7 +181,7 @@ func Test_AddPrefixes(t *testing.T) {
 		}
 
 		// --- When ---
-		have := AddPrefixes("", data)
+		have := AddPrefixes(data, "")
 
 		// --- Then ---
 		want := map[string]string{
@@ -195,7 +195,7 @@ func Test_AddPrefixes(t *testing.T) {
 
 	t.Run("nil map", func(t *testing.T) {
 		// --- When ---
-		have := AddPrefixes("", nil)
+		have := AddPrefixes(nil, "")
 
 		// --- Then ---
 		assert.Nil(t, have)
@@ -212,7 +212,7 @@ func Test_ChangePrefix(t *testing.T) {
 		}
 
 		// --- When ---
-		have := ChangePrefix("MY", "YOUR", data)
+		have := ChangePrefix(data, "MY", "YOUR")
 
 		// --- Then ---
 		want := map[string]string{
@@ -229,7 +229,7 @@ func Test_ChangePrefix(t *testing.T) {
 		data := map[string]string{"MYSQL_HOST": "VAL_1", "MY": "VAL_2"}
 
 		// --- When ---
-		have := ChangePrefix("MY", "YOUR", data)
+		have := ChangePrefix(data, "MY", "YOUR")
 
 		// --- Then ---
 		want := map[string]string{"MYSQL_HOST": "VAL_1", "MY": "VAL_2"}
@@ -245,7 +245,7 @@ func Test_ChangePrefix(t *testing.T) {
 		}
 
 		// --- When ---
-		have := ChangePrefix("", "MY", data)
+		have := ChangePrefix(data, "", "MY")
 
 		// --- Then ---
 		want := map[string]string{
@@ -266,7 +266,7 @@ func Test_ChangePrefix(t *testing.T) {
 		}
 
 		// --- When ---
-		have := ChangePrefix("MY", "", data)
+		have := ChangePrefix(data, "MY", "")
 
 		// --- Then ---
 		want := map[string]string{
@@ -283,7 +283,7 @@ func Test_ChangePrefix(t *testing.T) {
 		data := map[string]string{"MY_KEY": "VAL_1", "YOUR_KEY": "VAL_2"}
 
 		// --- When ---
-		have := ChangePrefix("MY", "YOUR", data)
+		have := ChangePrefix(data, "MY", "YOUR")
 
 		// --- Then ---
 		assert.Equal(t, map[string]string{"YOUR_KEY": "VAL_1"}, have)
@@ -291,7 +291,7 @@ func Test_ChangePrefix(t *testing.T) {
 
 	t.Run("nil map", func(t *testing.T) {
 		// --- When ---
-		have := ChangePrefix("MY", "YOUR", nil)
+		have := ChangePrefix(nil, "MY", "YOUR")
 
 		// --- Then ---
 		assert.Nil(t, have)
