@@ -1,3 +1,15 @@
+## v0.2.0 (Thu, 22 Oct 2026 19:14:04 UTC)
+- fix(xcfg)!: wrap key sentinels in parser and check errors.
+- refactor(xcfg)!: take the map or provider first in key functions.
+- refactor(xcfg)!: rename Adaptor to KeyAdapter.
+- fix(xcfg)!: return an error from Marshal for unreadable keys.
+- docs(xcfg): expand the package godoc and document CfgKeyAdapt.
+- feat(xcfg): accept padded base64 configurations.
+- refactor(xcfg)!: rename ErrCfgFileNotFound to ErrCfgFileRead.
+- test(xcfg): fuzz the Config.Marshal round trip.
+- ci: run race tests in GitHub Actions.
+- ci: fuzz Config.Marshal weekly.
+
 ## v0.1.2 (Sun, 18 Oct 2026 08:25:15 UTC)
 - chore(deps): update dependencies.
 
