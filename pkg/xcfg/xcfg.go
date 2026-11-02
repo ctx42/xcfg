@@ -161,9 +161,10 @@ func (cfg Config) CfgKey(key string) (string, error) {
 
 // Marshal outputs the given configuration map as a dotenv-formatted file.
 // Each line is in the format: KEY="VALUE" where VALUE is backslash-escaped.
-// Keys are written verbatim, so a key [New] cannot read back — empty, or
-// holding "=", ":", "#", or whitespace — is an error: a [FieldErrors]
-// wrapping [ErrKeyInvalid] for every such key.
+// Keys are written verbatim, so a key [New] cannot read back — empty,
+// holding "=", ":", "#", or whitespace, or starting with a UTF-8 byte order
+// mark — is an error: a [FieldErrors] wrapping [ErrKeyInvalid] for every such
+// key.
 func (cfg Config) Marshal() (string, error) {
 	var ers map[string]error
 	lns := make([]string, 0, len(cfg))

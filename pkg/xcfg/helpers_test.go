@@ -214,6 +214,7 @@ func Test_isDotenvKey_tabular(t *testing.T) {
 		{"lower case with dot", "key.name", true},
 		{"dash", "KEY-NAME", true},
 		{"non-ASCII", "KLUCZ_Ż", true},
+		{"inner byte order mark", "A\ufeffB", true},
 		{"empty", "", false},
 		{"equals", "A=B", false},
 		{"colon", "A:B", false},
@@ -223,6 +224,7 @@ func Test_isDotenvKey_tabular(t *testing.T) {
 		{"new line", "A\nB", false},
 		{"carriage return", "A\rB", false},
 		{"no-break space", "\u00a0A", false},
+		{"leading byte order mark", "\ufeffA", false},
 	}
 
 	for _, tc := range tt {

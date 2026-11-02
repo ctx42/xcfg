@@ -74,9 +74,13 @@ func doubleQuoteEscape(lin string) string {
 }
 
 // isDotenvKey reports whether [New] reads the key back as written: it is not
-// empty and holds no "=", ":", "#", or whitespace.
+// empty, holds no "=", ":", "#", or whitespace, and does not start with a
+// UTF-8 byte order mark, which [New] drops from the first line.
 func isDotenvKey(key string) bool {
 	if key == "" || strings.ContainsAny(key, "=:#") {
+		return false
+	}
+	if strings.HasPrefix(key, "\ufeff") {
 		return false
 	}
 	return strings.IndexFunc(key, unicode.IsSpace) == -1
