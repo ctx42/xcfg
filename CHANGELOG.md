@@ -1,3 +1,6 @@
+## v0.2.1 (Mon, 02 Nov 2026 12:36:50 UTC)
+- fix(xcfg): reject keys starting with a byte order mark.
+
 ## v0.2.0 (Thu, 22 Oct 2026 19:14:04 UTC)
 - fix(xcfg)!: wrap key sentinels in parser and check errors.
 - refactor(xcfg)!: take the map or provider first in key functions.
