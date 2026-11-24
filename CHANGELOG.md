@@ -1,3 +1,6 @@
+## v0.2.2 (Tue, 24 Nov 2026 14:36:49 UTC)
+- chore(deps): update dependencies.
+
 ## v0.2.1 (Mon, 02 Nov 2026 12:36:50 UTC)
 - fix(xcfg): reject keys starting with a byte order mark.
 
